@@ -251,6 +251,11 @@
     "startAudit": "Start audit",
     "submit": "Submit audit",
     "thisPlayspace": "This playspace...",
+    "multiSelect": {
+        "hint": "Choose every option that applies.",
+        "required": "Choose at least one option to answer this question.",
+        "selectedCount": "{{count}} of {{total}} chosen"
+    },
     "pendingUploads": {
         "titleOne": "1 audit waiting to upload",
         "titleOther": "{{count}} audits waiting to upload",

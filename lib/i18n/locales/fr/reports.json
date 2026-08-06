@@ -11,7 +11,14 @@
         "constructChallenge": "Opportunités de défi",
         "constructSociability": "Soutien social",
         "constructPlayValue": "Valeur ludique",
-        "constructUsability": "Utilisabilité"
+        "constructUsability": "Utilisabilité",
+        "sociabilityPlayAlone": "Jouer seul",
+        "sociabilitySmallGroup": "Petit groupe",
+        "sociabilityLargeGroup": "Grand groupe",
+        "sociabilityNoData": "Aucun domaine n'a enregistré cette possibilité de jeu, il n'y a donc rien à comparer.",
+        "sociabilitySingleDomain": "Seul {{domain}} a enregistré cette possibilité de jeu. Au moins deux domaines sont nécessaires pour comparer.",
+        "sociabilityAllTied": "Tous les domaines à égalité",
+        "tiedCount": "{{count}} domaines à égalité"
     },
     "bulkExportTitle": "Export groupé des audits soumis",
     "challengeShort": "C",
@@ -83,7 +90,14 @@
         "expandSection": "Développer la section",
         "collapseSection": "Réduire la section",
         "showItems": "Afficher les éléments ({{count}})",
-        "hideItems": "Masquer les éléments"
+        "hideItems": "Masquer les éléments",
+        "barSociabilityPlayAlone": "Jouer seul",
+        "barSociabilitySmallGroup": "Petit groupe",
+        "barSociabilityLargeGroup": "Grand groupe",
+        "barRowSociability": "Sociabilité",
+        "sociabilityBestWorstTitle": "Valeurs les plus hautes et les plus basses par possibilité de jeu",
+        "sociabilityBreakdownNotCaptured": "Cet instrument n'a pas enregistré le détail de la sociabilité.",
+        "sociabilityCoverage": "Possibilités de jeu enregistrées pour {{captured}} des {{eligible}} éléments concernés."
     },
     "emptyMessage": "Essayez une autre combinaison de recherche ou de filtre.",
     "emptyTitle": "Aucun rapport correspondant",
@@ -111,7 +125,11 @@
         "maxScore": "Score maximal : {{max}}",
         "notApplicableFull": "Non applicable",
         "unsure": "Incertain",
-        "notApplicable": "N/D"
+        "notApplicable": "N/D",
+        "columnSociabilityPlayAlone": "Jouer seul",
+        "columnSociabilitySmallGroup": "Petit groupe",
+        "columnSociabilityLargeGroup": "Grand groupe",
+        "sociabilityNoneSelected": "Aucune sélection"
     },
     "filtersLabel": "Filtres",
     "legend": {

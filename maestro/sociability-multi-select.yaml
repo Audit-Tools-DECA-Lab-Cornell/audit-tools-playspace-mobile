@@ -1,0 +1,57 @@
+# Verify the audit execution screen renders the Sociability scale as independent checkboxes and
+# keeps every combination through a restart.
+#
+# Note: this flow only reaches the checkbox UI once an instrument with
+# `selection_mode: "multiple"` is active. Until the 5.32 candidate is activated the live
+# instrument scores Sociability as one answer, so the optional steps below pass through without
+# asserting the checkbox state. Helper-level selection behaviour is covered by
+# tests/sociability-ui-selection.spec.ts (Vitest).
+appId: com.pratyush.sudhakar.audittoolsplayspacemobile
+---
+- runFlow: create-audit.yaml
+- extendedWaitUntil:
+      visible: ".*Provision.*|.*This playspace.*|.*Question.*|.*of.*"
+      timeout: 30000
+
+# Answer Provision so the follow-up scales, including Sociability, become visible.
+- runFlow:
+      when:
+          visible: ".*Some.*"
+      commands:
+          - tapOn: ".*Some.*"
+
+- scrollUntilVisible:
+      element:
+          text: ".*Sociability.*|.*opportunities for a child to.*"
+      direction: DOWN
+      timeout: 10000
+      optional: true
+
+# Choose two of the three opportunities. They are independent, so both stay selected.
+- runFlow:
+      when:
+          visible: "Play on their own"
+      commands:
+          - tapOn: "Play on their own"
+          - tapOn: "Play together in a larger group (5 or more other users)"
+          - assertVisible:
+                text: "2 of 3 chosen"
+
+# Selections must survive an app restart with no network.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+      visible: ".*Provision.*|.*This playspace.*|.*Question.*|.*of.*"
+      timeout: 30000
+- scrollUntilVisible:
+      element:
+          text: ".*Sociability.*|.*opportunities for a child to.*"
+      direction: DOWN
+      timeout: 10000
+      optional: true
+- runFlow:
+      when:
+          visible: "Play on their own"
+      commands:
+          - assertVisible:
+                text: "2 of 3 chosen"

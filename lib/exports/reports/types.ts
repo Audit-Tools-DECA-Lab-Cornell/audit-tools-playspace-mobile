@@ -1,4 +1,5 @@
 import { SCALE_ACCENT_COLORS, SCALE_SOFT_COLORS } from "lib/audit/scale-colors";
+import { SOCIABILITY_EXPORT_HEADERS } from "lib/audit/sociability";
 import type { ScaleKey } from "lib/audit/types";
 
 /** File formats supported by the mobile export flow. */
@@ -78,6 +79,7 @@ export const SINGLE_RESPONSE_HEADERS = [
     "Provision",
     "Variety",
     "Sociability",
+    ...SOCIABILITY_EXPORT_HEADERS,
     "Challenge",
     "PV Score",
     "U Score",
@@ -96,7 +98,7 @@ export const PDF_RESPONSE_HEADERS = [
     "U Score",
 ] as const;
 
-export const PREVIEW_RESPONSE_COLUMN_INDEXES = [0, 1, 2, 3, 6, 7, 8, 9, 10] as const;
+export const PREVIEW_RESPONSE_COLUMN_INDEXES = [0, 1, 2, 3, 6, 7, 8, 9, 13] as const;
 
 export const OVERVIEW_COLUMN_WIDTHS = [28, 56] as const;
 export const SINGLE_PRE_AUDIT_COLUMN_WIDTHS = [42, 58] as const;
@@ -104,7 +106,7 @@ export const SINGLE_SPACE_AUDIT_COLUMN_WIDTHS = [42, 58] as const;
 export const BULK_PRE_AUDIT_COLUMN_WIDTHS = [16, 24, 40, 56] as const;
 export const BULK_SPACE_AUDIT_COLUMN_WIDTHS = [16, 24, 40, 56] as const;
 export const GUIDANCE_COLUMN_WIDTHS = [24, 64, 56] as const;
-export const SINGLE_RESPONSE_COLUMN_WIDTHS = [14, 14, 16, 24, 44, 42, 72, 22, 22, 22, 24, 16, 16] as const;
+export const SINGLE_RESPONSE_COLUMN_WIDTHS = [14, 14, 16, 24, 44, 42, 72, 22, 22, 22, 22, 22, 22, 24, 16, 16] as const;
 export const BULK_RESPONSE_COLUMN_WIDTHS = SINGLE_RESPONSE_COLUMN_WIDTHS;
 
 /** Original mobile export palette, kept for reference/fallback comparison. */
@@ -161,7 +163,10 @@ export const SCALE_COLUMN_MAP: Partial<Record<number, ExportScaleKey>> = {
     7: "provision",
     8: "variety",
     9: "sociability",
-    10: "challenge",
+    10: "sociability",
+    11: "sociability",
+    12: "sociability",
+    13: "challenge",
 };
 
 /** PDF response matrix scale column indexes, matching `PDF_RESPONSE_HEADERS`. */

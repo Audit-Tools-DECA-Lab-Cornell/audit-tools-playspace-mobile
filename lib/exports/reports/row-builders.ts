@@ -6,6 +6,11 @@ import {
     formatScoreValue,
     getEffectiveAuditScoreTotals,
 } from "lib/audit/score-helpers";
+import {
+    SOCIABILITY_EXPORT_NOT_CAPTURED,
+    buildSociabilityExportCells,
+    formatMultipleSociabilityAnswer,
+} from "lib/audit/sociability";
 import type {
     AuditScoreTotals,
     AuditSession,
@@ -501,6 +506,9 @@ export function buildSectionHeaderRow(
         "",
         "",
         "",
+        "",
+        "",
+        "",
     ];
 }
 
@@ -527,10 +535,19 @@ export function buildQuestionResponseRow(
             "",
             "",
             "",
+            "",
+            "",
+            "",
             "N/A",
             "N/A",
         ];
     }
+
+    const sociabilityCells = buildSociabilityExportCells(question, answers);
+    const sociabilityAggregate =
+        typeof answers.sociability === "string"
+            ? formatQuestionAnswer(question, "sociability", answers.sociability)
+            : formatMultipleSociabilityAnswer(question, answers);
 
     return [
         questionKey,
@@ -546,11 +563,8 @@ export function buildQuestionResponseRow(
             typeof answers.provision === "string" ? answers.provision : undefined,
         ),
         formatQuestionAnswer(question, "variety", typeof answers.variety === "string" ? answers.variety : undefined),
-        formatQuestionAnswer(
-            question,
-            "sociability",
-            typeof answers.sociability === "string" ? answers.sociability : undefined,
-        ),
+        sociabilityAggregate,
+        ...sociabilityCells,
         formatQuestionAnswer(
             question,
             "challenge",
@@ -568,7 +582,7 @@ export function buildQuestionCommentRow(
     comment: string,
     questionKey: string,
 ): SpreadsheetRow {
-    return [questionKey, COMMENT_ROW_SENTINEL, "", "", "", "", comment, "", "", "", "", "", ""];
+    return [questionKey, COMMENT_ROW_SENTINEL, "", "", "", "", comment, "", "", "", "", "", "", "", "", ""];
 }
 
 /** Produces one or two full-width banner rows for the section note block. */
@@ -579,7 +593,7 @@ export function buildSectionNoteRow(
     notesPrompt: string,
     submittedComment: string,
 ): readonly SpreadsheetRow[] {
-    const blank = ["", "", "", "", "", "", "", "", "", "", ""] as const;
+    const blank = ["", "", "", "", "", "", "", "", "", "", "", "", "", ""] as const;
     const rows: SpreadsheetRow[] = [];
 
     if (notesPrompt.length > 0) {
@@ -619,6 +633,7 @@ export function buildScoreSummaryRow(
     rowKind: ScoreRowKind,
 ): SpreadsheetRow {
     const base = [idLabel, modeLabel, SCORE_ROW_SENTINEL, "", "", "", ""] as const;
+    const breakdown = totals.sociability_breakdown;
 
     if (rowKind === "raw") {
         return [
@@ -626,6 +641,9 @@ export function buildScoreSummaryRow(
             totals.provision_total,
             totals.variety_total,
             totals.sociability_total,
+            breakdown?.play_alone.total ?? SOCIABILITY_EXPORT_NOT_CAPTURED,
+            breakdown?.small_group.total ?? SOCIABILITY_EXPORT_NOT_CAPTURED,
+            breakdown?.large_group.total ?? SOCIABILITY_EXPORT_NOT_CAPTURED,
             totals.challenge_total,
             totals.play_value_total,
             totals.usability_total,
@@ -638,6 +656,9 @@ export function buildScoreSummaryRow(
             totals.provision_total_max,
             totals.variety_total_max,
             totals.sociability_total_max,
+            breakdown?.play_alone.max ?? SOCIABILITY_EXPORT_NOT_CAPTURED,
+            breakdown?.small_group.max ?? SOCIABILITY_EXPORT_NOT_CAPTURED,
+            breakdown?.large_group.max ?? SOCIABILITY_EXPORT_NOT_CAPTURED,
             totals.challenge_total_max,
             totals.play_value_total_max,
             totals.usability_total_max,
@@ -649,6 +670,15 @@ export function buildScoreSummaryRow(
         formatPercentage(totals.provision_total, totals.provision_total_max),
         formatPercentage(totals.variety_total, totals.variety_total_max),
         formatPercentage(totals.sociability_total, totals.sociability_total_max),
+        breakdown === null || breakdown === undefined
+            ? SOCIABILITY_EXPORT_NOT_CAPTURED
+            : formatPercentage(breakdown.play_alone.total, breakdown.play_alone.max),
+        breakdown === null || breakdown === undefined
+            ? SOCIABILITY_EXPORT_NOT_CAPTURED
+            : formatPercentage(breakdown.small_group.total, breakdown.small_group.max),
+        breakdown === null || breakdown === undefined
+            ? SOCIABILITY_EXPORT_NOT_CAPTURED
+            : formatPercentage(breakdown.large_group.total, breakdown.large_group.max),
         formatPercentage(totals.challenge_total, totals.challenge_total_max),
         formatPercentage(totals.play_value_total, totals.play_value_total_max),
         formatPercentage(totals.usability_total, totals.usability_total_max),
@@ -657,7 +687,7 @@ export function buildScoreSummaryRow(
 
 /** Produces a blank separator row. */
 export function buildEmptyResponseRow(): SpreadsheetRow {
-    return ["", "", "", "", "", "", "", "", "", "", "", "", ""];
+    return ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
 }
 
 /** Build a workbook-style response table for a single audit. */

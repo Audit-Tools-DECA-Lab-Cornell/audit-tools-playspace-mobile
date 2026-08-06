@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, List } from "@tamagui/lucide-icons-2";
 import { Paragraph, Separator, Text, XStack, YStack } from "tamagui";
 import { useTranslation } from "react-i18next";
 import type { DomainReportRow } from "lib/audit/report-helpers";
+import { getSociabilityBreakdownCoverage } from "lib/audit/report-helpers";
 import type { AuditScoreTotals } from "lib/audit/types";
 import { useDesignSystem } from "lib/design-system";
 import { BestWorstTable } from "components/reports/BestWorstTable";
@@ -33,6 +34,10 @@ export const SubmittedReportContent = memo(function SubmittedReportContent({
     const [itemsOpenByDomain, setItemsOpenByDomain] = useState<Record<string, boolean>>({});
 
     const expansionKeys = useMemo(() => [...domainRows.map((row) => row.domainKey), "__overall__"], [domainRows]);
+
+    // Null for instruments that never captured the three opportunities - the report says so rather
+    // than implying three zero scores.
+    const sociabilityCoverage = getSociabilityBreakdownCoverage(overallScores);
 
     // Domains with no scoreable content (all N/A) start collapsed so scored
     // results lead the report; they stay expandable (6.1, presentation only).
@@ -156,7 +161,23 @@ export const SubmittedReportContent = memo(function SubmittedReportContent({
                     scoreTotals={overallScores}
                 />
                 {isExpanded("__overall__") ? (
-                    <DomainScoreDisplay scoreTotals={overallScores} itemCount={overallItemCount} />
+                    <YStack gap="$2" width="100%">
+                        <DomainScoreDisplay scoreTotals={overallScores} itemCount={overallItemCount} />
+                        {sociabilityCoverage === null ? null : (
+                            <Text
+                                color={ds.colors.mutedForeground}
+                                fontFamily={ds.fonts.bodyMedium}
+                                fontSize={ds.typography.bodyXs.fontSize}
+                                lineHeight={ds.typography.bodyXs.lineHeight}
+                            >
+                                {t("domain.sociabilityCoverage", {
+                                    ns: "reports",
+                                    captured: sociabilityCoverage.capturedQuestionCount,
+                                    eligible: sociabilityCoverage.eligibleQuestionCount,
+                                })}
+                            </Text>
+                        )}
+                    </YStack>
                 ) : null}
             </DomainCard>
 

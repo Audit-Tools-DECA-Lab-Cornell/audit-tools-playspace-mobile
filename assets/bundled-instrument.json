@@ -6,7 +6,7 @@
             "### 1. Provision\n\nProvision is always answered first. When the provision answer is a zero-like response such as No or Not applicable, the remaining scales stay hidden because they do not apply.\n\n\n**Guiding question:** To what degree is this feature/environmental characteristic present or considered?\n\n\nExample: If the feature is swings, Quantity asks for the number of swings available. \n**It is your judgment to indicate if there are None; Some or A lot of swings provided. You only can choose one.**",
             "### 2. Variety\n\nVariety evaluates whether the provided items offer a variety of types, forms, or opportunities. In other words, whether they are not all the same.\n\n\n**Guiding question:** To what extent is variety in this feature/environmental characteristic considered?\n\n\nExample: For 5 swings: Are they all different types (e.g. large swing, baby swing, basket swing, rope swing), or are they all identical?\n\n\n**It is your judgment to indicate if there is No variety, Some variety, or A lot of variety considered. You can only choose one.**",
             "### 3. Challenge opportunities\n\nChallenge opportunities assess whether the feature provides opportunities with different levels of difficulty.\n\n\n**Guiding question:** To what extent does this feature/environmental characteristic offer different levels of challenge?\n\n\nExample: The swings provided should be examined and judged to determine whether they provide increasing challenge opportunities.\n\n\n**It is your judgment to indicate if the provided swings offer different levels of difficulty. You can only choose one.**",
-            "### 4. Sociability support\n\nSociability support assesses whether more than one child/person can use this feature/environmental characteristic together. It considers whether the feature can be used by more than one person at once, individually, in small groups, or in larger groups.\n\n\n**Guiding question:** Can more than one child (or person) use this feature together?\n\n\nExample: Can some of the swings be used alone? Can some be used in pairs? Can some be used in groups of children?\n\n\n**It is your judgment to indicate if they can be used alone, in pairs, or in groups.**",
+            "### 4. Sociability support\n\nSociability support assesses whether this feature/environmental characteristic provides opportunities for a child to play alone, in a small group, or in a large group.\n\n\n**Guiding question:** Does this feature/environmental characteristic provide opportunities for a child to...\n\n\nMultiple selections are allowed. Play alone, small group, and large group are treated as equal opportunities, with each selected opportunity contributing one point.",
             "## Open reflection\nThe open question gives you the possibility to write down reflections. A guiding question will ask you to describe one or two aspects you recommend changing in the playspace to increase its play value and usability.",
             "## Two parts of the audit\n\nThe Playspace Play Value and Usability Audit tool uses two methods for assessing a playspace:\n\n\n- **Onsite Audit of the Physical Environment**\nThis part of the audit assesses aspects of the playspace that can only be examined onsite in the physical environment.\nIt requires being physically present at the playspace.\n\n\n- **Survey of Ecological Aspects of the Playspace**\nThis part of the audit assesses information related to the history, management practices, and how weather and seasons influence playspace use.\nIt does not require being onsite.\nIt must be answered by someone familiar with the playspace's background and context.",
             "## Before you continue\n\nBefore moving to the next section, you must decide which part(s) of the audit you will complete: Onsite Audit, Survey, or Both.\n\n\nYour choice depends on how familiar you are with the playspace and what role you have."
@@ -2149,36 +2149,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No side by side use",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - 2 users side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - 3+ users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Accommodating diverse abilities"],
@@ -2264,36 +2265,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No side by side use",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - 2 users side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - 3+ users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Pathways"],
@@ -2384,36 +2386,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - use for only 1 user",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - 2 users together",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - 3+ users together",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Novelty"],
@@ -2474,36 +2477,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for a small group of users (2-10)",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for a large group of users (11 or more)",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Open Space"],
@@ -2555,36 +2559,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for a small group of users (2-10)",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for a large group of users (11 or more)",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Open Space"],
@@ -2684,36 +2689,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2-3 users",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 4+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Enclosed & Bounded Spaces"],
@@ -2799,36 +2805,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2-3 users",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 4+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Enclosed & Bounded Spaces"],
@@ -2919,36 +2926,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2-3 users",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 4+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Enclosed & Bounded Spaces"],
@@ -3043,36 +3051,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for a small group of users (2-10)",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for a large group of users (11 or more)",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Sport & Game Spaces"],
@@ -3305,36 +3314,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -3454,36 +3464,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -3603,36 +3614,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -3752,36 +3764,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -3901,36 +3914,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -4050,36 +4064,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -4199,36 +4214,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -4348,36 +4364,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -4463,36 +4480,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -4702,36 +4720,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - a pair side by side",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than 2 users side by side",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Manufactured Play Features"],
@@ -5172,36 +5191,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2-3 users",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 4+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Natural Play Features"],
@@ -5321,36 +5341,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2-3 users",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 4+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Natural Play Features"],
@@ -5958,36 +5979,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2 users only",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 3+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Loose Manufactured Parts & Equipment"],
@@ -8116,7 +8138,7 @@
                     },
                     {
                         "mode": "audit",
-                        "prompt": "has features that **make use of sunlight, changing natural light, and/or electronic lighting**-creating sensory and play opportunitites through light responive features (e.g. stained-glass panels; illuminated features; features that create patterned or moving shadows)",
+                        "prompt": "has features that **make use of sunlight, changing natural light, and/or electronic lighting**—creating sensory and play opportunitites through light responive features (e.g. stained-glass panels; illuminated features; features that create patterned or moving shadows)",
                         "scales": [
                             {
                                 "key": "provision",
@@ -8270,36 +8292,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2 users only",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 3+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Novelty"],
@@ -8419,36 +8442,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2 users only",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 3+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Novelty"],
@@ -8730,36 +8754,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2 users only",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 3+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Novelty"],
@@ -9097,36 +9122,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2 users only",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 3+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Sensory Qualities & Regulation"],
@@ -9293,36 +9319,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No - for 1 user only",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_a_pair",
-                                        "label": "Yes - for 2 users only",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - for 3+ users",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Sensory Qualities & Regulation"],
@@ -9381,7 +9408,7 @@
                         "question_type": "scaled"
                     }
                 ],
-                "description": "**Sensory Qualities & Regulation:** evaluates how well a space supports diverse sensory experiences that can enhance engagement, comfort, and well‑being. Considers the presence of visual, auditory, olfactory, and tactile elements that create interest and stimulation-such as color accents, varied textures, sounds, pleasant smells, and interactive features. It also assesses whether the environment may introduce negative sensory experiences or is supportive of varying sensory needs such as opportunities for sensory retreat or reduced stimulation.",
+                "description": "**Sensory Qualities & Regulation:** evaluates how well a space supports diverse sensory experiences that can enhance engagement, comfort, and well‑being. Considers the presence of visual, auditory, olfactory, and tactile elements that create interest and stimulation—such as color accents, varied textures, sounds, pleasant smells, and interactive features. It also assesses whether the environment may introduce negative sensory experiences or is supportive of varying sensory needs such as opportunities for sensory retreat or reduced stimulation.",
                 "instruction": "Read each statement and answer the questions. This playspace...",
                 "section_key": "section_20_sensory_qualities_regulation",
                 "notes_prompt": "Any comments? Describe one or more recommendations to improve the sensory qualitites of this playspace:"
@@ -10086,36 +10113,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_pair_or_two_users",
-                                        "label": "Yes - a pair",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than two children",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Playspace suitability for diverse users"],
@@ -10244,36 +10272,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_pair_or_two_users",
-                                        "label": "Yes - a pair",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than two children",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Playspace suitability for diverse users"],
@@ -10402,36 +10431,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_pair_or_two_users",
-                                        "label": "Yes - a pair",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than two children",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Playspace suitability for diverse users"],
@@ -10560,36 +10590,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_pair_or_two_users",
-                                        "label": "Yes - a pair",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than two children",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Playspace suitability for diverse users"],
@@ -10718,36 +10749,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_pair_or_two_users",
-                                        "label": "Yes - a pair",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than two children",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Playspace suitability for diverse users"],
@@ -10876,36 +10908,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_pair_or_two_users",
-                                        "label": "Yes - a pair",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than two children",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Playspace suitability for diverse users"],
@@ -11034,36 +11067,37 @@
                             {
                                 "key": "sociability",
                                 "title": "Sociability Support",
-                                "prompt": "Can more than one child/person use this feature/environmental characteristic together?",
+                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                                 "options": [
                                     {
-                                        "key": "no",
-                                        "label": "No",
+                                        "key": "play_alone",
+                                        "label": "Play on their own",
                                         "is_unsure": false,
                                         "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "yes_pair_or_two_users",
-                                        "label": "Yes - a pair",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
                                         "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     },
                                     {
-                                        "key": "yes_more_than_two_children",
-                                        "label": "Yes - more than two children",
+                                        "key": "small_group",
+                                        "label": "Play together in a small group (1-4 other users)",
                                         "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "large_group",
+                                        "label": "Play together in a larger group (5 or more other users)",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 1,
                                         "is_not_applicable": false,
                                         "allows_follow_up_scales": false
                                     }
-                                ]
+                                ],
+                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Playspace suitability for diverse users"],
@@ -11220,20 +11254,11 @@
             {
                 "key": "sociability",
                 "title": "Sociability Support",
-                "prompt": "Can more than one child or person use this feature/environmental characteristic together?",
+                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
                 "options": [
                     {
-                        "key": "not_applicable",
-                        "label": "Not applicable",
-                        "is_unsure": false,
-                        "boost_value": 1,
-                        "addition_value": 0,
-                        "is_not_applicable": true,
-                        "allows_follow_up_scales": false
-                    },
-                    {
-                        "key": "no",
-                        "label": "No",
+                        "key": "play_alone",
+                        "label": "Play on their own",
                         "is_unsure": false,
                         "boost_value": 1,
                         "addition_value": 1,
@@ -11241,25 +11266,26 @@
                         "allows_follow_up_scales": false
                     },
                     {
-                        "key": "yes_a_pair",
-                        "label": "Yes - a pair",
+                        "key": "small_group",
+                        "label": "Play together in a small group (1-4 other users)",
                         "is_unsure": false,
-                        "boost_value": 2,
-                        "addition_value": 2,
+                        "boost_value": 1,
+                        "addition_value": 1,
                         "is_not_applicable": false,
                         "allows_follow_up_scales": false
                     },
                     {
-                        "key": "yes_more_than_two_children",
-                        "label": "Yes - more than two children",
+                        "key": "large_group",
+                        "label": "Play together in a larger group (5 or more other users)",
                         "is_unsure": false,
-                        "boost_value": 3,
-                        "addition_value": 3,
+                        "boost_value": 1,
+                        "addition_value": 1,
                         "is_not_applicable": false,
                         "allows_follow_up_scales": false
                     }
                 ],
-                "description": "Sociability Support assesses whether the feature can be used by more than one child or person together."
+                "description": "Select every opportunity this feature or environmental characteristic provides. Multiple selections are allowed, and each selected opportunity contributes one point.",
+                "selection_mode": "multiple"
             }
         ],
         "execution_modes": [
@@ -11506,10 +11532,15 @@
                         "key": "cookies-analytics",
                         "body": [
                             "The web platform and mobile app may use cookies, local storage, device storage, crash logs, diagnostics, or similar technologies to keep users signed in, remember preferences, support offline drafts, measure reliability, and protect the platform from abuse.",
-                            "Where required, the organization or platform operator will provide additional choices for non-essential cookies or analytics."
+                            "To understand how the web dashboard is used and to improve it, we also use third-party analytics services. These may set cookies and process usage data such as pages viewed, actions taken, approximate location derived from your IP address, and device or browser details.",
+                            "If you are in the European Economic Area, the United Kingdom, or Switzerland, we show a consent banner and do not run non-essential analytics until you accept it. In other regions, analytics runs by default and you can turn it off using the banner. To change a previous choice, clear this site's stored data in your browser.",
+                            "Where required, the organization or platform operator may provide additional choices for non-essential cookies or analytics."
                         ],
                         "title": "11. Cookies, analytics, and diagnostics",
-                        "bullets": []
+                        "bullets": [
+                            "Microsoft Clarity: captures how you use and interact with the dashboard through product-usage metrics, heatmaps, and session replay so we can improve it. This data is collected using first- and third-party cookies and similar technologies. To learn how Microsoft collects and uses it, see the Microsoft Privacy Statement (https://privacy.microsoft.com/privacystatement).",
+                            "Google Analytics 4: helps us measure traffic and understand how features are used. In the European Economic Area, the United Kingdom, and Switzerland it runs under Google Consent Mode, so analytics cookies are set only after you accept the consent banner. To learn how Google uses this data, see Google's Privacy Policy (https://policies.google.com/privacy)."
+                        ]
                     },
                     {
                         "key": "changes-contact",
@@ -11522,10 +11553,10 @@
                     }
                 ],
                 "short_title": "Privacy",
-                "last_updated": "April 30, 2026"
+                "last_updated": "July 1, 2026"
             }
         ],
-        "instrument_version": "5.31",
+        "instrument_version": "5.32",
         "pre_audit_questions": [
             {
                 "key": "auditor_code",

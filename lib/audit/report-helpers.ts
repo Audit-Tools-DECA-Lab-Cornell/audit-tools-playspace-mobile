@@ -1,4 +1,9 @@
 import { calculateQuestionScores, formatScoreValue } from "lib/audit/score-helpers";
+import {
+    SOCIABILITY_CATEGORY_KEYS,
+    readSociabilitySelectionState,
+    type SociabilityCategorySelections,
+} from "lib/audit/sociability";
 import type {
     AuditScoreTotals,
     AuditScoreVariantBuckets,
@@ -48,6 +53,8 @@ export interface DomainQuestionRow {
     readonly sociabilityAnswered: boolean;
     readonly sociabilityIsNotApplicable: boolean;
     readonly sociabilityIsUnsure: boolean;
+    readonly sociabilityCapturedAsMultiselect: boolean;
+    readonly sociabilitySelections: SociabilityCategorySelections;
     readonly followUpScalesAsked: boolean;
     readonly playValueScore: number | null;
     readonly playValueMax: number | null;
@@ -70,6 +77,43 @@ export interface ConstructRanking {
         score: number;
         max: number;
     } | null;
+}
+
+export interface RankedDomain {
+    readonly domainTitle: string;
+    readonly score: number;
+    readonly max: number;
+    /** Share of the maximum, 0-100, rounded for display. Ranking uses the unrounded ratio. */
+    readonly percent: number;
+}
+
+export interface SociabilityCategoryRanking {
+    readonly categoryKey: (typeof SOCIABILITY_CATEGORY_KEYS)[number];
+    readonly capturedQuestionCount: number;
+    readonly eligibleQuestionCount: number;
+    /** First domain of {@link bestDomains}; kept so single-example callers stay simple. */
+    readonly bestDomain: ConstructRanking["bestDomain"];
+    /** First domain of {@link worstDomains}. */
+    readonly worstDomain: ConstructRanking["worstDomain"];
+    /** Every domain tied at the highest share of the maximum. */
+    readonly bestDomains: readonly RankedDomain[];
+    /** Every domain tied at the lowest share of the maximum. */
+    readonly worstDomains: readonly RankedDomain[];
+    /** Domains that have a positive maximum for this opportunity and can therefore be compared. */
+    readonly comparableDomainCount: number;
+    /**
+     * False when nothing can be compared: no domain has a positive maximum, or only one domain does
+     * and naming it both highest and lowest would mislead.
+     */
+    readonly hasSufficientData: boolean;
+    /** Every comparable domain shares the same share of the maximum. */
+    readonly allTied: boolean;
+}
+
+export interface SociabilityBreakdownCoverage {
+    readonly capturedQuestionCount: number;
+    readonly eligibleQuestionCount: number;
+    readonly isComplete: boolean;
 }
 
 type ConstructAccessor = {
@@ -271,6 +315,7 @@ function buildDomainQuestionRow(question: InstrumentQuestion, answers: QuestionR
     const challengeInfo = resolveScaleOptionInfo(question, "challenge", readStringAnswer(answers, "challenge"));
     const challengeApplicable = question.scales.some((scale: InstrumentScaleDefinition) => scale.key === "challenge");
     const sociabilityInfo = resolveScaleOptionInfo(question, "sociability", readStringAnswer(answers, "sociability"));
+    const sociabilitySelectionState = readSociabilitySelectionState(question, answers);
     const sociabilityApplicable = question.scales.some(
         (scale: InstrumentScaleDefinition) => scale.key === "sociability",
     );
@@ -303,6 +348,9 @@ function buildDomainQuestionRow(question: InstrumentQuestion, answers: QuestionR
         sociabilityAnswered: sociabilityInfo.answered,
         sociabilityIsNotApplicable: sociabilityInfo.isNotApplicable,
         sociabilityIsUnsure: sociabilityInfo.isUnsure,
+        sociabilityCapturedAsMultiselect:
+            sociabilitySelectionState.selectionMode === "multiple" && sociabilitySelectionState.captured,
+        sociabilitySelections: sociabilitySelectionState.selections,
         followUpScalesAsked,
         playValueScore: playValueMax <= 0 ? null : scores.play_value_total,
         playValueMax: playValueMax <= 0 ? null : playValueMax,
@@ -606,6 +654,111 @@ export function buildConstructRankings(domainRows: DomainReportRow[]): Construct
             },
         };
     });
+}
+
+export function getSociabilityBreakdownCoverage(
+    scoreTotals: AuditScoreTotals | null | undefined,
+): SociabilityBreakdownCoverage | null {
+    const breakdown = scoreTotals?.sociability_breakdown;
+    if (breakdown === null || breakdown === undefined) {
+        return null;
+    }
+
+    return {
+        capturedQuestionCount: breakdown.captured_question_count,
+        eligibleQuestionCount: breakdown.eligible_question_count,
+        isComplete: breakdown.captured_question_count === breakdown.eligible_question_count,
+    };
+}
+
+export function buildSociabilityCategoryRankings(domainRows: readonly DomainReportRow[]): SociabilityCategoryRanking[] {
+    return SOCIABILITY_CATEGORY_KEYS.map((categoryKey) => {
+        const candidates: { title: string; score: number; max: number; ratio: number }[] = [];
+        let capturedQuestionCount = 0;
+        let eligibleQuestionCount = 0;
+
+        domainRows.forEach((row) => {
+            const breakdown = row.scoreTotals?.sociability_breakdown;
+            if (breakdown === null || breakdown === undefined) {
+                return;
+            }
+            capturedQuestionCount += breakdown.captured_question_count;
+            eligibleQuestionCount += breakdown.eligible_question_count;
+            const category = breakdown[categoryKey];
+            if (category.max <= 0) {
+                return;
+            }
+            candidates.push({
+                title: row.domainTitle,
+                score: category.total,
+                max: category.max,
+                ratio: category.total / category.max,
+            });
+        });
+
+        const { best, worst, allTied } = rankSociabilityCandidates(candidates);
+        const bestDomain = best[0];
+        const worstDomain = worst[0];
+
+        return {
+            categoryKey,
+            capturedQuestionCount,
+            eligibleQuestionCount,
+            bestDomain:
+                bestDomain === undefined
+                    ? null
+                    : { domainTitle: bestDomain.domainTitle, score: bestDomain.score, max: bestDomain.max },
+            worstDomain:
+                worstDomain === undefined
+                    ? null
+                    : { domainTitle: worstDomain.domainTitle, score: worstDomain.score, max: worstDomain.max },
+            bestDomains: best,
+            worstDomains: worst,
+            comparableDomainCount: candidates.length,
+            hasSufficientData: candidates.length >= 2,
+            allTied,
+        };
+    });
+}
+
+/**
+ * Ranking tolerance: ratios closer than this count as tied, so 1/3 and 2/6 rank together instead of
+ * splitting on floating-point noise.
+ */
+const RANKING_TIE_TOLERANCE = 1e-9;
+
+/**
+ * Split ranked candidates into every domain tied at the top and every domain tied at the bottom.
+ *
+ * Ranking is by share of the maximum, so domains with different maximums stay comparable.
+ */
+function rankSociabilityCandidates(
+    candidates: readonly { title: string; score: number; max: number; ratio: number }[],
+): { best: readonly RankedDomain[]; worst: readonly RankedDomain[]; allTied: boolean } {
+    if (candidates.length === 0) {
+        return { best: [], worst: [], allTied: false };
+    }
+
+    const ratios = candidates.map((candidate) => candidate.ratio);
+    const highest = Math.max(...ratios);
+    const lowest = Math.min(...ratios);
+
+    const toRanked = (candidate: (typeof candidates)[number]): RankedDomain => ({
+        domainTitle: candidate.title,
+        score: candidate.score,
+        max: candidate.max,
+        percent: Math.round(candidate.ratio * 100),
+    });
+
+    return {
+        best: candidates
+            .filter((candidate) => Math.abs(candidate.ratio - highest) <= RANKING_TIE_TOLERANCE)
+            .map(toRanked),
+        worst: candidates
+            .filter((candidate) => Math.abs(candidate.ratio - lowest) <= RANKING_TIE_TOLERANCE)
+            .map(toRanked),
+        allTied: Math.abs(highest - lowest) <= RANKING_TIE_TOLERANCE,
+    };
 }
 
 /**

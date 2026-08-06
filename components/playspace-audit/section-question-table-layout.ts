@@ -5,6 +5,8 @@ export interface SectionQuestionTableScaleContent {
     readonly headerLabel: string;
     readonly maxOptionLabelLength: number;
     readonly scalePrompt: string;
+    /** Checkbox columns spend width on the box and its gap before any label text. */
+    readonly usesMultipleSelection?: boolean;
 }
 
 export interface SectionQuestionTableColumnMetrics {
@@ -29,6 +31,8 @@ const NARROW_TABLET_SCALE_COLUMN_MAX_WIDTH = 288;
 const WIDE_TABLET_SCALE_COLUMN_MAX_WIDTH = 320;
 const LABEL_LENGTH_BASELINE = 18;
 const WIDTH_GROWTH_PER_EXTRA_CHARACTER = 4;
+/** Checkbox (24) plus its gap (10) plus the option row padding, reclaimed for the label. */
+const MULTIPLE_SELECTION_COLUMN_ALLOWANCE = 56;
 
 /**
  * Resolve the section table column widths with a simple scroll-first layout:
@@ -100,16 +104,13 @@ function resolveScaleColumnWidth(
     scaleContent: SectionQuestionTableScaleContent | undefined,
     widthProgress: number,
 ): number {
-    const minimumWidth = interpolateWidthValue(
-        NARROW_TABLET_SCALE_COLUMN_MIN_WIDTH,
-        WIDE_TABLET_SCALE_COLUMN_MIN_WIDTH,
-        widthProgress,
-    );
-    const maximumWidth = interpolateWidthValue(
-        NARROW_TABLET_SCALE_COLUMN_MAX_WIDTH,
-        WIDE_TABLET_SCALE_COLUMN_MAX_WIDTH,
-        widthProgress,
-    );
+    const selectionAllowance = scaleContent?.usesMultipleSelection === true ? MULTIPLE_SELECTION_COLUMN_ALLOWANCE : 0;
+    const minimumWidth =
+        interpolateWidthValue(NARROW_TABLET_SCALE_COLUMN_MIN_WIDTH, WIDE_TABLET_SCALE_COLUMN_MIN_WIDTH, widthProgress) +
+        selectionAllowance;
+    const maximumWidth =
+        interpolateWidthValue(NARROW_TABLET_SCALE_COLUMN_MAX_WIDTH, WIDE_TABLET_SCALE_COLUMN_MAX_WIDTH, widthProgress) +
+        selectionAllowance;
     const longestLabelLength = Math.max(
         scaleContent?.headerLabel.trim().length ?? 0,
         scaleContent?.maxOptionLabelLength ?? 0,

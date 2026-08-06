@@ -6,6 +6,7 @@ import type {
     QuestionResponsePayload,
 } from "lib/audit/types";
 import { getVisibleSections } from "lib/audit/selectors";
+import { buildSociabilityExportCells, formatMultipleSociabilityAnswer } from "lib/audit/sociability";
 
 import {
     formatChecklistAnswer,
@@ -259,6 +260,9 @@ function buildSectionHeaderRow(
         "",
         "",
         "",
+        "",
+        "",
+        "",
     ];
 }
 
@@ -285,15 +289,23 @@ function buildQuestionResponseRow(
             "",
             "",
             "",
+            "",
+            "",
+            "",
         ];
     }
 
-    const readScale = (scaleKey: "provision" | "variety" | "sociability" | "challenge"): string => {
+    const readScale = (scaleKey: "provision" | "variety" | "challenge"): string => {
         const rawValue = answers[scaleKey];
         return orUnanswered(
             formatQuestionAnswer(question, scaleKey, typeof rawValue === "string" ? rawValue : undefined),
         );
     };
+    const sociabilityCells = buildSociabilityExportCells(question, answers);
+    const sociabilityAggregate =
+        typeof answers.sociability === "string"
+            ? formatQuestionAnswer(question, "sociability", answers.sociability)
+            : formatMultipleSociabilityAnswer(question, answers);
 
     return [
         questionKey,
@@ -303,17 +315,18 @@ function buildQuestionResponseRow(
         prompt,
         readScale("provision"),
         readScale("variety"),
-        readScale("sociability"),
+        orUnanswered(sociabilityAggregate),
+        ...sociabilityCells,
         readScale("challenge"),
     ];
 }
 
 function buildQuestionCommentRow(comment: string, questionKey: string): SpreadsheetRow {
-    return [questionKey, COMMENT_ROW_SENTINEL, "", "", comment, "", "", "", ""];
+    return [questionKey, COMMENT_ROW_SENTINEL, "", "", comment, "", "", "", "", "", "", ""];
 }
 
 function buildSectionNoteRows(notesPrompt: string, submittedComment: string): readonly SpreadsheetRow[] {
-    const blank = ["", "", "", "", "", "", ""] as const;
+    const blank = ["", "", "", "", "", "", "", "", "", ""] as const;
     const rows: SpreadsheetRow[] = [];
 
     if (notesPrompt.length > 0) {

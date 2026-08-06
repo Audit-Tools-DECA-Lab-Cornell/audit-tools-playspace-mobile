@@ -11,7 +11,14 @@
         "constructChallenge": "Herausforderungsmöglichkeiten",
         "constructSociability": "Soziale Unterstützung",
         "constructPlayValue": "Spielwert",
-        "constructUsability": "Nutzerfreundlichkeit"
+        "constructUsability": "Nutzerfreundlichkeit",
+        "sociabilityPlayAlone": "Allein spielen",
+        "sociabilitySmallGroup": "Kleine Gruppe",
+        "sociabilityLargeGroup": "Größere Gruppe",
+        "sociabilityNoData": "Kein Bereich hat diese Spielmöglichkeit erfasst, daher gibt es nichts zu vergleichen.",
+        "sociabilitySingleDomain": "Nur {{domain}} hat diese Spielmöglichkeit erfasst. Für einen Vergleich sind mindestens zwei Bereiche nötig.",
+        "sociabilityAllTied": "Alle Bereiche gleichauf",
+        "tiedCount": "{{count}} Bereiche gleichauf"
     },
     "bulkExportTitle": "Sammel-Export eingereichter Audits",
     "challengeShort": "C",
@@ -83,7 +90,14 @@
         "expandSection": "Abschnitt ausklappen",
         "collapseSection": "Abschnitt einklappen",
         "showItems": "Elemente anzeigen ({{count}})",
-        "hideItems": "Elemente ausblenden"
+        "hideItems": "Elemente ausblenden",
+        "barSociabilityPlayAlone": "Allein spielen",
+        "barSociabilitySmallGroup": "Kleine Gruppe",
+        "barSociabilityLargeGroup": "Größere Gruppe",
+        "barRowSociability": "Geselligkeit",
+        "sociabilityBestWorstTitle": "Höchste und niedrigste Werte je Spielmöglichkeit",
+        "sociabilityBreakdownNotCaptured": "Dieses Instrument hat die Aufschlüsselung der Geselligkeit nicht erfasst.",
+        "sociabilityCoverage": "Spielmöglichkeiten für {{captured}} von {{eligible}} zutreffenden Elementen erfasst."
     },
     "emptyMessage": "Versuchen Sie eine andere Such- oder Filterkombination.",
     "emptyTitle": "Keine Berichte gefunden",
@@ -111,7 +125,11 @@
         "maxScore": "Maximalpunktzahl: {{max}}",
         "notApplicableFull": "Nicht zutreffend",
         "unsure": "Unsicher",
-        "notApplicable": "k. A."
+        "notApplicable": "k. A.",
+        "columnSociabilityPlayAlone": "Allein spielen",
+        "columnSociabilitySmallGroup": "Kleine Gruppe",
+        "columnSociabilityLargeGroup": "Größere Gruppe",
+        "sociabilityNoneSelected": "Nichts ausgewählt"
     },
     "filtersLabel": "Filter",
     "legend": {

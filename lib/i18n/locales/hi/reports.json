@@ -11,7 +11,14 @@
         "constructChallenge": "चुनौतीपूर्ण अवसर",
         "constructSociability": "सामाजिक सहायता",
         "constructPlayValue": "खेल मूल्य",
-        "constructUsability": "उपयोगिता"
+        "constructUsability": "उपयोगिता",
+        "sociabilityPlayAlone": "अकेले खेलना",
+        "sociabilitySmallGroup": "छोटा समूह",
+        "sociabilityLargeGroup": "बड़ा समूह",
+        "sociabilityNoData": "किसी भी क्षेत्र ने यह खेल अवसर दर्ज नहीं किया, इसलिए तुलना करने के लिए कुछ नहीं है।",
+        "sociabilitySingleDomain": "यह खेल अवसर केवल {{domain}} ने दर्ज किया। तुलना के लिए कम से कम दो क्षेत्र चाहिए।",
+        "sociabilityAllTied": "सभी क्षेत्र बराबर",
+        "tiedCount": "{{count}} क्षेत्र बराबर"
     },
     "bulkExportTitle": "सबमिट किए गए ऑडिट का सामूहिक निर्यात",
     "challengeShort": "C",
@@ -83,7 +90,14 @@
         "expandSection": "खंड विस्तृत करें",
         "collapseSection": "खंड संकुचित करें",
         "showItems": "आइटम दिखाएँ ({{count}})",
-        "hideItems": "आइटम छिपाएँ"
+        "hideItems": "आइटम छिपाएँ",
+        "barSociabilityPlayAlone": "अकेले खेलना",
+        "barSociabilitySmallGroup": "छोटा समूह",
+        "barSociabilityLargeGroup": "बड़ा समूह",
+        "barRowSociability": "सामाजिकता",
+        "sociabilityBestWorstTitle": "खेल अवसर के अनुसार उच्चतम और न्यूनतम स्कोर",
+        "sociabilityBreakdownNotCaptured": "इस उपकरण ने सामाजिकता का विवरण दर्ज नहीं किया।",
+        "sociabilityCoverage": "{{eligible}} लागू आइटम में से {{captured}} के लिए खेल अवसर दर्ज किए गए।"
     },
     "emptyMessage": "कोई अलग खोज या फ़िल्टर संयोजन आज़माएँ।",
     "emptyTitle": "कोई रिपोर्ट मेल नहीं खाती",
@@ -111,7 +125,11 @@
         "maxScore": "अधिकतम स्कोर: {{max}}",
         "notApplicableFull": "लागू नहीं",
         "unsure": "अनिश्चित",
-        "notApplicable": "लागू नहीं"
+        "notApplicable": "लागू नहीं",
+        "columnSociabilityPlayAlone": "अकेले खेलना",
+        "columnSociabilitySmallGroup": "छोटा समूह",
+        "columnSociabilityLargeGroup": "बड़ा समूह",
+        "sociabilityNoneSelected": "कुछ नहीं चुना गया"
     },
     "filtersLabel": "फ़िल्टर",
     "legend": {

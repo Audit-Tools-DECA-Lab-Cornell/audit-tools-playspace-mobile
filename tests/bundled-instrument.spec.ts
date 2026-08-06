@@ -13,9 +13,21 @@ describe("bundled instrument offline fallback", () => {
         expect(instrument?.sections.length).toBeGreaterThan(0);
     });
 
-    it("exposes the bundled instrument version", () => {
-        expect(typeof BUNDLED_INSTRUMENT_VERSION).toBe("string");
-        expect(BUNDLED_INSTRUMENT_VERSION).not.toBe("unknown");
+    it("bundles the complete 5.32 Sociability multi-select instrument", () => {
+        const instrument = getBundledInstrument();
+        const sociabilityScales =
+            instrument?.sections.flatMap((section) =>
+                section.questions.flatMap((question) => question.scales.filter((scale) => scale.key === "sociability")),
+            ) ?? [];
+
+        expect(BUNDLED_INSTRUMENT_VERSION).toBe("5.32");
         expect(getBundledInstrument()?.instrument_version).toBe(BUNDLED_INSTRUMENT_VERSION);
+        expect(sociabilityScales).toHaveLength(34);
+        expect(sociabilityScales.every((scale) => scale.selection_mode === "multiple")).toBe(true);
+        expect(
+            sociabilityScales.every(
+                (scale) => scale.options.map((option) => option.key).join(",") === "play_alone,small_group,large_group",
+            ),
+        ).toBe(true);
     });
 });

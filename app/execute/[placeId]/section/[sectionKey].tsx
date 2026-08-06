@@ -30,6 +30,7 @@ import {
     getVisibleSections,
     isInstrumentQuestionComplete,
 } from "lib/audit/selectors";
+import { toggleMultipleScaleOption } from "lib/audit/sociability";
 import type {
     AuditSession,
     ExecutionMode,
@@ -432,6 +433,26 @@ export default function ExecuteSectionScreen() {
         const nextAnswers = buildNextQuestionAnswers(currentAnswers, question, scaleKey, optionKey);
         applyLocalQuestionAnswer(resolvedPairKey, resolvedActiveSection.section_key, questionKey, nextAnswers);
     };
+
+    const handleToggleMultipleOption = (
+        question: InstrumentSection["questions"][number],
+        questionKey: string,
+        scaleKey: string,
+        optionKey: string,
+    ) => {
+        if (!canEditInputs) {
+            return;
+        }
+
+        const scale = question.scales.find((currentScale) => currentScale.key === scaleKey);
+        if (scale === undefined) {
+            return;
+        }
+
+        const currentAnswers = getQuestionAnswers(resolvedAuditSession, resolvedActiveSection.section_key, questionKey);
+        const nextAnswers = toggleMultipleScaleOption(currentAnswers, scale, optionKey);
+        applyLocalQuestionAnswer(resolvedPairKey, resolvedActiveSection.section_key, questionKey, nextAnswers);
+    };
     const notesPanel = (
         <YStack
             rounded={ds.radii.lg}
@@ -645,6 +666,13 @@ export default function ExecuteSectionScreen() {
                                     return;
                                 }
                                 handleSelectAnswer(question, questionKey, scaleKey, optionKey);
+                            }}
+                            onToggleMultipleOption={(questionKey, scaleKey, optionKey) => {
+                                const question = questionByKey.get(questionKey);
+                                if (question === undefined) {
+                                    return;
+                                }
+                                handleToggleMultipleOption(question, questionKey, scaleKey, optionKey);
                             }}
                             onChangeAnswers={(questionKey, nextAnswers) => {
                                 if (!canEditInputs) {

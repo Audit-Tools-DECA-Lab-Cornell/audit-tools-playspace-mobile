@@ -1,4 +1,5 @@
 import type { AuditSession } from "lib/audit/types";
+import { SOCIABILITY_EXPORT_HEADERS } from "lib/audit/sociability";
 
 import type { AuditExportContext, ExportAuditorProfile } from "lib/exports/reports/types";
 
@@ -35,10 +36,11 @@ export const IN_PROGRESS_RESPONSE_HEADERS = [
     "Provision",
     "Variety",
     "Sociability",
+    ...SOCIABILITY_EXPORT_HEADERS,
     "Challenge",
 ] as const;
 
-export const IN_PROGRESS_RESPONSE_COLUMN_WIDTHS = [14, 14, 16, 28, 64, 26, 26, 26, 26] as const;
+export const IN_PROGRESS_RESPONSE_COLUMN_WIDTHS = [14, 14, 16, 28, 64, 26, 26, 26, 26, 26, 26, 26] as const;
 
 export const IN_PROGRESS_OVERVIEW_COLUMN_WIDTHS = [28, 56] as const;
 export const IN_PROGRESS_PRE_AUDIT_COLUMN_WIDTHS = [42, 58] as const;

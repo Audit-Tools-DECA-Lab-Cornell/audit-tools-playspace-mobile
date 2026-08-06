@@ -8,8 +8,10 @@ import {
     type SectionQuestionTableColumnMetrics,
     type SectionQuestionTableScaleContent,
 } from "components/playspace-audit/section-question-table-layout";
+import { ScaleMultiSelect } from "components/playspace-audit/scale-multi-select";
 import { getScaleAccentColor, getScaleSoftColor, useDesignSystem } from "lib/design-system";
 import { getActiveScaleKeysForQuestion } from "lib/audit/selectors";
+import { isMultipleSelectionScale, readMultipleScaleSelection } from "lib/audit/sociability";
 import type { InstrumentQuestion, QuestionResponsePayload, QuestionScale, ScaleKey } from "lib/audit/types";
 import { useResponsiveLayout } from "lib/responsive-layout";
 import { formatQuestionKeyForDisplay, parsePromptSegments } from "lib/audit/prompt-segments";
@@ -23,6 +25,8 @@ interface SectionQuestionTableProps {
     readonly rows: readonly QuestionTableRow[];
     readonly disabled: boolean;
     readonly onSelectAnswer: (questionKey: string, scaleKey: string, optionKey: string) => void;
+    /** Toggle one option of a scale that accepts any non-empty combination. */
+    readonly onToggleMultipleOption: (questionKey: string, scaleKey: string, optionKey: string) => void;
     /**
      * Persist per-question notes when {@link InstrumentQuestion.notes_prompt} is set -
      * mirrors {@link QuestionCard} so tablet matrix layout keeps the same fields as phone cards.
@@ -40,6 +44,7 @@ export function SectionQuestionTable({
     rows,
     disabled,
     onSelectAnswer,
+    onToggleMultipleOption,
     onChangeAnswers,
 }: Readonly<SectionQuestionTableProps>) {
     const ds = useDesignSystem();
@@ -148,6 +153,29 @@ export function SectionQuestionTable({
                                                     text={t("section.table.followUpPending")}
                                                     showTrailingBorder={showTrailingBorder}
                                                     locked
+                                                />
+                                            );
+                                        }
+
+                                        if (isMultipleSelectionScale(scale)) {
+                                            return (
+                                                <MultipleScaleCell
+                                                    key={`${row.question.question_key}.${scaleKey}`}
+                                                    scale={scale}
+                                                    selectedOptionKeys={readMultipleScaleSelection(
+                                                        row.selectedAnswers,
+                                                        scale,
+                                                    )}
+                                                    width={readScaleColumnWidth(columnMetrics, scaleKey)}
+                                                    disabled={disabled}
+                                                    showTrailingBorder={showTrailingBorder}
+                                                    onToggleOption={(optionKey) => {
+                                                        onToggleMultipleOption(
+                                                            row.question.question_key,
+                                                            scale.key,
+                                                            optionKey,
+                                                        );
+                                                    }}
                                                 />
                                             );
                                         }
@@ -479,6 +507,49 @@ function ScaleOptionCell({
     );
 }
 
+interface MultipleScaleCellProps {
+    readonly scale: QuestionScale;
+    readonly selectedOptionKeys: readonly string[];
+    readonly width: number;
+    readonly disabled: boolean;
+    readonly showTrailingBorder: boolean;
+    readonly onToggleOption: (optionKey: string) => void;
+}
+
+/**
+ * One active scale cell whose options are independent checkboxes rather than one exclusive choice.
+ */
+function MultipleScaleCell({
+    scale,
+    selectedOptionKeys,
+    width,
+    disabled,
+    showTrailingBorder,
+    onToggleOption,
+}: Readonly<MultipleScaleCellProps>) {
+    const ds = useDesignSystem();
+
+    return (
+        <YStack
+            width={width}
+            px="$2.5"
+            py="$3"
+            borderRightWidth={showTrailingBorder ? 1 : 0}
+            borderColor={ds.colors.border}
+            justify="center"
+        >
+            <ScaleMultiSelect
+                scale={scale}
+                variant="table"
+                showTitle={false}
+                selectedOptionKeys={selectedOptionKeys}
+                disabled={disabled}
+                onToggleOption={onToggleOption}
+            />
+        </YStack>
+    );
+}
+
 interface EmptyScaleCellProps {
     readonly width: number;
     readonly text: string;
@@ -541,12 +612,14 @@ function getScaleContentByKey(
     for (const scaleKey of scaleKeys) {
         let maxOptionLabelLength = 0;
         let scalePrompt = "";
+        let usesMultipleSelection = false;
         for (const row of rows) {
             const matchingScale = row.question.scales.find((scale) => scale.key === scaleKey);
             if (matchingScale === undefined) {
                 continue;
             }
             scalePrompt = matchingScale.prompt;
+            usesMultipleSelection = usesMultipleSelection || isMultipleSelectionScale(matchingScale);
 
             for (const option of matchingScale.options) {
                 maxOptionLabelLength = Math.max(maxOptionLabelLength, option.label.trim().length);
@@ -557,6 +630,7 @@ function getScaleContentByKey(
             headerLabel: getScaleHeaderLabel(scaleKey),
             maxOptionLabelLength,
             scalePrompt,
+            usesMultipleSelection,
         };
     }
 

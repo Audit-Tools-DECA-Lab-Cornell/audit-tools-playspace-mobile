@@ -11,7 +11,14 @@
         "constructChallenge": "挑戦的な機会",
         "constructSociability": "社会的支援",
         "constructPlayValue": "プレイ価値",
-        "constructUsability": "使いやすさ"
+        "constructUsability": "使いやすさ",
+        "sociabilityPlayAlone": "ひとりで遊ぶ",
+        "sociabilitySmallGroup": "少人数グループ",
+        "sociabilityLargeGroup": "大人数グループ",
+        "sociabilityNoData": "この遊びの機会を記録した領域がないため、比較できません。",
+        "sociabilitySingleDomain": "この遊びの機会を記録したのは{{domain}}のみです。比較には2つ以上の領域が必要です。",
+        "sociabilityAllTied": "すべての領域が同点",
+        "tiedCount": "{{count}}領域が同点"
     },
     "bulkExportTitle": "提出済み監査の一括エクスポート",
     "challengeShort": "C",
@@ -83,7 +90,14 @@
         "expandSection": "セクションを展開",
         "collapseSection": "セクションを折りたたむ",
         "showItems": "項目を表示 ({{count}})",
-        "hideItems": "項目を非表示"
+        "hideItems": "項目を非表示",
+        "barSociabilityPlayAlone": "ひとりで遊ぶ",
+        "barSociabilitySmallGroup": "少人数グループ",
+        "barSociabilityLargeGroup": "大人数グループ",
+        "barRowSociability": "社会性",
+        "sociabilityBestWorstTitle": "遊びの機会別の最高・最低スコア",
+        "sociabilityBreakdownNotCaptured": "この調査票では社会性の内訳を記録していません。",
+        "sociabilityCoverage": "該当{{eligible}}項目のうち{{captured}}項目で遊びの機会を記録しました。"
     },
     "emptyMessage": "別の検索条件またはフィルターの組み合わせをお試しください。",
     "emptyTitle": "一致するレポートはありません",
@@ -111,7 +125,11 @@
         "maxScore": "最大スコア: {{max}}",
         "notApplicableFull": "該当なし",
         "unsure": "不明",
-        "notApplicable": "該当なし"
+        "notApplicable": "該当なし",
+        "columnSociabilityPlayAlone": "ひとりで遊ぶ",
+        "columnSociabilitySmallGroup": "少人数グループ",
+        "columnSociabilityLargeGroup": "大人数グループ",
+        "sociabilityNoneSelected": "選択なし"
     },
     "filtersLabel": "フィルター",
     "legend": {

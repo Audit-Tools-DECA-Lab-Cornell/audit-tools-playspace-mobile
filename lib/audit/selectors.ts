@@ -7,6 +7,7 @@ import type {
     PlayspaceInstrument,
     PreAuditQuestion,
 } from "lib/audit/types";
+import { isQuestionScaleAnswerComplete } from "lib/audit/sociability";
 
 /**
  * Progress for one instrument section derived from locally stored responses.
@@ -272,8 +273,8 @@ export function isInstrumentQuestionComplete(
     }
 
     return requiredKeys.every((scaleKey) => {
-        const value = selectedAnswers[scaleKey];
-        return typeof value === "string" && value.trim().length > 0;
+        const scale = question.scales.find((candidate) => candidate.key === scaleKey);
+        return scale !== undefined && isQuestionScaleAnswerComplete(scale, selectedAnswers[scaleKey]);
     });
 }
 
