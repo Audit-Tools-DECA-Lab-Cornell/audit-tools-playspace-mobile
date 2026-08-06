@@ -8,6 +8,8 @@ import { useResponsiveLayout } from "lib/responsive-layout";
 import type { InstrumentQuestion, QuestionResponsePayload, QuestionScale } from "lib/audit/types";
 import { formatQuestionKeyForDisplay, parsePromptSegments } from "lib/audit/prompt-segments";
 import { toggleChecklistOption, setChecklistOtherText } from "lib/audit/checklist-helpers";
+import { isMultipleSelectionScale, readMultipleScaleSelection, toggleMultipleScaleOption } from "lib/audit/sociability";
+import { ScaleMultiSelect } from "components/playspace-audit/scale-multi-select";
 
 interface QuestionCardProps {
     readonly question: InstrumentQuestion;
@@ -113,6 +115,23 @@ export function QuestionCard({
                     {question.scales.map((scale, scaleIndex) => {
                         if (scaleIndex > 0 && !showFollowUpScales) {
                             return null;
+                        }
+
+                        if (isMultipleSelectionScale(scale)) {
+                            return (
+                                <MultiSelectScaleSurface
+                                    key={`${question.question_key}.${scale.key}`}
+                                    scale={scale}
+                                    selectedOptionKeys={readMultipleScaleSelection(selectedAnswers, scale)}
+                                    disabled={disabled}
+                                    onToggleOption={(optionKey) => {
+                                        onChangeAnswers(
+                                            question.question_key,
+                                            toggleMultipleScaleOption(selectedAnswers, scale, optionKey),
+                                        );
+                                    }}
+                                />
+                            );
                         }
 
                         return (
@@ -293,6 +312,46 @@ function ScaleSelector({
                     );
                 })}
             </XStack>
+        </YStack>
+    );
+}
+
+interface MultiSelectScaleSurfaceProps {
+    readonly scale: QuestionScale;
+    readonly selectedOptionKeys: readonly string[];
+    readonly disabled: boolean;
+    readonly onToggleOption: (optionKey: string) => void;
+}
+
+/**
+ * Frame a multiple-selection scale in the same surface the single-select scales use, so a question
+ * that mixes both reads as one consistent card.
+ */
+function MultiSelectScaleSurface({
+    scale,
+    selectedOptionKeys,
+    disabled,
+    onToggleOption,
+}: Readonly<MultiSelectScaleSurfaceProps>) {
+    const ds = useDesignSystem();
+    const layout = useResponsiveLayout();
+
+    return (
+        <YStack
+            rounded={ds.radii.md}
+            borderWidth={1}
+            borderColor={ds.colors.border}
+            bg={ds.colors.input}
+            p={layout.isTablet ? 16 : 12}
+            borderLeftWidth={3}
+            borderLeftColor={getScaleAccentColor(scale.key, ds.colors) as ColorTokens}
+        >
+            <ScaleMultiSelect
+                scale={scale}
+                selectedOptionKeys={selectedOptionKeys}
+                disabled={disabled}
+                onToggleOption={onToggleOption}
+            />
         </YStack>
     );
 }

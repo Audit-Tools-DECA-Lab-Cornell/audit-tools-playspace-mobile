@@ -220,5 +220,10 @@
     },
     "startAudit": "監査を開始",
     "submit": "監査を提出",
+    "multiSelect": {
+        "hint": "当てはまるものをすべて選択してください。",
+        "required": "この質問に答えるには、少なくとも1つ選択してください。",
+        "selectedCount": "{{total}}件中{{count}}件を選択"
+    },
     "thisPlayspace": "このプレイスペース..."
 }

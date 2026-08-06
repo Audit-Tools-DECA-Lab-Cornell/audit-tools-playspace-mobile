@@ -220,5 +220,10 @@
     },
     "startAudit": "Commencer l’audit",
     "submit": "Soumettre l’audit",
+    "multiSelect": {
+        "hint": "Sélectionnez toutes les options applicables.",
+        "required": "Sélectionnez au moins une option pour répondre à cette question.",
+        "selectedCount": "{{count}} sur {{total}} sélectionnées"
+    },
     "thisPlayspace": "Cet espace de jeu..."
 }

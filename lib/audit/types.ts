@@ -12,6 +12,7 @@ export const auditStatusSchema = z.enum(["IN_PROGRESS", "PAUSED", "SUBMITTED"]);
 export const questionModeSchema = z.enum(["audit", "survey", "both"]);
 export const constructKeySchema = z.enum(["usability", "play_value"]);
 export const scaleKeySchema = z.enum(["provision", "variety", "sociability", "challenge"]);
+export const scaleSelectionModeSchema = z.enum(["single", "multiple"]);
 export const preAuditInputTypeSchema = z.enum(["single_select", "multi_select", "auto_timestamp"]);
 export const preAuditPageKeySchema = z.enum(["audit_info", "space_setup"]);
 export const questionTypeSchema = z.enum(["scaled", "checklist"]);
@@ -46,6 +47,7 @@ export const scaleDefinitionSchema = z.object({
     title: z.string().min(1),
     prompt: z.string().min(1),
     description: z.string().min(1),
+    selection_mode: scaleSelectionModeSchema.default("single"),
     options: z.array(scaleOptionSchema),
 });
 
@@ -65,6 +67,7 @@ export const questionScaleSchema = z.object({
     key: scaleKeySchema,
     title: z.string().min(1),
     prompt: z.string().min(1),
+    selection_mode: scaleSelectionModeSchema.default("single"),
     options: z.array(scaleOptionSchema),
 });
 
@@ -194,6 +197,18 @@ export const auditScoreTotalsSchema = z.object({
     challenge_total_max: z.number(),
     sociability_total: z.number(),
     sociability_total_max: z.number(),
+    sociability_breakdown: z
+        .object({
+            model: z.literal("multi_select_v1"),
+            play_alone: z.object({ total: z.number(), max: z.number() }),
+            small_group: z.object({ total: z.number(), max: z.number() }),
+            large_group: z.object({ total: z.number(), max: z.number() }),
+            captured_question_count: z.number().int().nonnegative(),
+            eligible_question_count: z.number().int().nonnegative(),
+        })
+        .nullable()
+        .optional()
+        .default(null),
     play_value_total: z.number(),
     play_value_total_max: z.number(),
     usability_total: z.number(),
@@ -416,6 +431,7 @@ export type AuditStatus = z.infer<typeof auditStatusSchema>;
 export type QuestionMode = z.infer<typeof questionModeSchema>;
 export type ConstructKey = z.infer<typeof constructKeySchema>;
 export type ScaleKey = z.infer<typeof scaleKeySchema>;
+export type ScaleSelectionMode = z.infer<typeof scaleSelectionModeSchema>;
 export type PreAuditInputType = z.infer<typeof preAuditInputTypeSchema>;
 export type PreAuditPageKey = z.infer<typeof preAuditPageKeySchema>;
 export type QuestionType = z.infer<typeof questionTypeSchema>;
@@ -437,6 +453,8 @@ export type QuestionResponseValue = z.infer<typeof questionResponseValueSchema>;
 export type QuestionResponsePayload = z.infer<typeof questionResponsePayloadSchema>;
 export type AuditSectionState = z.infer<typeof auditSectionStateSchema>;
 export type AuditScoreTotals = z.infer<typeof auditScoreTotalsSchema>;
+export type SociabilityBreakdown = NonNullable<AuditScoreTotals["sociability_breakdown"]>;
+export type SociabilityCategoryKey = "play_alone" | "small_group" | "large_group";
 export type AuditScoreVariantBuckets = z.infer<typeof auditScoreVariantBucketsSchema>;
 export type AuditUnsureVariants = z.infer<typeof auditUnsureVariantsSchema>;
 export type AuditScores = z.infer<typeof auditScoresSchema>;

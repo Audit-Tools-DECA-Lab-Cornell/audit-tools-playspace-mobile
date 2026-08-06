@@ -220,5 +220,10 @@
     },
     "startAudit": "Audit starten",
     "submit": "Audit einreichen",
+    "multiSelect": {
+        "hint": "Wählen Sie alle zutreffenden Optionen aus.",
+        "required": "Wählen Sie mindestens eine Option, um diese Frage zu beantworten.",
+        "selectedCount": "{{count}} von {{total}} ausgewählt"
+    },
     "thisPlayspace": "Dieser Spielplatz..."
 }

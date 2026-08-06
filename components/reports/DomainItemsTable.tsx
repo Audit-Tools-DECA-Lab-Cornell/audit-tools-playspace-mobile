@@ -3,6 +3,7 @@ import { ScrollView, type LayoutChangeEvent, type NativeScrollEvent, type Native
 import { Text, XStack, YStack } from "tamagui";
 import { useTranslation } from "react-i18next";
 import type { DomainQuestionRow } from "lib/audit/report-helpers";
+import { SOCIABILITY_CATEGORY_KEYS } from "lib/audit/sociability";
 import { formatQuestionKeyForDisplay } from "lib/audit/prompt-segments";
 import { formatScoreValue } from "lib/audit/score-helpers";
 import { useDesignSystem } from "lib/design-system";
@@ -11,6 +12,29 @@ import { PromptRichText } from "components/reports/PromptRichText";
 
 export interface DomainItemsTableProps {
     readonly questions: DomainQuestionRow[];
+}
+
+const SOCIABILITY_CATEGORY_LABEL_KEYS: Record<(typeof SOCIABILITY_CATEGORY_KEYS)[number], string> = {
+    play_alone: "extendedTable.columnSociabilityPlayAlone",
+    small_group: "extendedTable.columnSociabilitySmallGroup",
+    large_group: "extendedTable.columnSociabilityLargeGroup",
+};
+
+/**
+ * List the play opportunities an auditor selected for one item.
+ *
+ * Selections stay in storage order and share one type style - the auditor may pick any combination
+ * and no combination outranks another.
+ */
+function formatSociabilitySelections(
+    selections: DomainQuestionRow["sociabilitySelections"],
+    translate: (key: string) => string,
+): string {
+    const selected = SOCIABILITY_CATEGORY_KEYS.filter((key) => selections[key] === true);
+    if (selected.length === 0) {
+        return translate("extendedTable.sociabilityNoneSelected");
+    }
+    return selected.map((key) => translate(SOCIABILITY_CATEGORY_LABEL_KEYS[key])).join("\n");
 }
 
 function formatPlayUsabilityCell(
@@ -247,13 +271,18 @@ export const DomainItemsTable = memo(function DomainItemsTable({ questions }: Do
                         },
                         {
                             label: t("extendedTable.columnSociability"),
-                            ...scaleValueText({
-                                label: question.sociabilityLabel,
-                                applicable: question.sociabilityApplicable,
-                                isNotApplicable: question.sociabilityIsNotApplicable,
-                                isUnsure: question.sociabilityIsUnsure,
-                                followUpScalesAsked: question.followUpScalesAsked,
-                            }),
+                            ...(question.sociabilityCapturedAsMultiselect
+                                ? {
+                                      text: formatSociabilitySelections(question.sociabilitySelections, t),
+                                      muted: false,
+                                  }
+                                : scaleValueText({
+                                      label: question.sociabilityLabel,
+                                      applicable: question.sociabilityApplicable,
+                                      isNotApplicable: question.sociabilityIsNotApplicable,
+                                      isUnsure: question.sociabilityIsUnsure,
+                                      followUpScalesAsked: question.followUpScalesAsked,
+                                  })),
                         },
                     ];
 
@@ -516,13 +545,19 @@ export const DomainItemsTable = memo(function DomainItemsTable({ questions }: Do
 
                                 {/* Sociability */}
                                 <CellWrapper width={cols.scaleColWidth}>
-                                    {renderScaleCellState({
-                                        label: question.sociabilityLabel,
-                                        applicable: question.sociabilityApplicable,
-                                        isNotApplicable: question.sociabilityIsNotApplicable,
-                                        isUnsure: question.sociabilityIsUnsure,
-                                        followUpScalesAsked: question.followUpScalesAsked,
-                                    })}
+                                    {question.sociabilityCapturedAsMultiselect ? (
+                                        <DataText textAlign="left">
+                                            {formatSociabilitySelections(question.sociabilitySelections, t)}
+                                        </DataText>
+                                    ) : (
+                                        renderScaleCellState({
+                                            label: question.sociabilityLabel,
+                                            applicable: question.sociabilityApplicable,
+                                            isNotApplicable: question.sociabilityIsNotApplicable,
+                                            isUnsure: question.sociabilityIsUnsure,
+                                            followUpScalesAsked: question.followUpScalesAsked,
+                                        })
+                                    )}
                                 </CellWrapper>
 
                                 {/* Play value */}

@@ -7,7 +7,7 @@ import { formatPercentage, formatScoreValue, roundedPercentOfMax } from "lib/aud
 import { useDesignSystem } from "lib/design-system";
 import { useResponsiveLayout } from "lib/responsive-layout";
 
-import { useReportScoreTableLayout } from "lib/report-table-layout";
+import { getSociabilityDataColumnWidth, useReportScoreTableLayout } from "lib/report-table-layout";
 import { DomainScoreTable } from "components/reports/DomainScoreTable";
 import { type TFunction } from "i18next";
 
@@ -18,7 +18,16 @@ export interface DomainScoreDisplayProps {
 
 // ── Metric definitions ───────────────────────────────────────────────────────
 
-type MetricKey = "provision" | "variety" | "challenge" | "sociability" | "play_value" | "usability";
+type MetricKey =
+    | "provision"
+    | "variety"
+    | "challenge"
+    | "sociability"
+    | "sociability_play_alone"
+    | "sociability_small_group"
+    | "sociability_large_group"
+    | "play_value"
+    | "usability";
 
 interface MetricConfig {
     readonly key: MetricKey;
@@ -46,6 +55,37 @@ const SCALE_METRICS: readonly MetricConfig[] = [
         value: (t) => t.challenge_total,
         max: (t) => t.challenge_total_max,
     },
+];
+
+/**
+ * Sociability as three independent opportunities.
+ *
+ * Order here is storage order, not rank. All three share one colour and one column width so the
+ * chart never suggests that larger-group play is worth more than playing alone.
+ */
+const SOCIABILITY_DIMENSION_METRICS: readonly MetricConfig[] = [
+    {
+        key: "sociability_play_alone",
+        labelKey: "domain.barSociabilityPlayAlone",
+        value: (t) => t.sociability_breakdown?.play_alone.total ?? 0,
+        max: (t) => t.sociability_breakdown?.play_alone.max ?? 0,
+    },
+    {
+        key: "sociability_small_group",
+        labelKey: "domain.barSociabilitySmallGroup",
+        value: (t) => t.sociability_breakdown?.small_group.total ?? 0,
+        max: (t) => t.sociability_breakdown?.small_group.max ?? 0,
+    },
+    {
+        key: "sociability_large_group",
+        labelKey: "domain.barSociabilityLargeGroup",
+        value: (t) => t.sociability_breakdown?.large_group.total ?? 0,
+        max: (t) => t.sociability_breakdown?.large_group.max ?? 0,
+    },
+];
+
+/** Sociability as one aggregate, for instruments that never captured the three opportunities. */
+const SOCIABILITY_TOTAL_METRICS: readonly MetricConfig[] = [
     {
         key: "sociability",
         labelKey: "domain.barSociability",
@@ -69,7 +109,10 @@ const CONSTRUCT_METRICS: readonly MetricConfig[] = [
     },
 ];
 
-const ALL_BAR_METRICS: readonly MetricConfig[] = [...SCALE_METRICS, ...CONSTRUCT_METRICS];
+/** Pick the Sociability bars that match what the source instrument actually captured. */
+function resolveSociabilityMetrics(scoreTotals: AuditScoreTotals | null): readonly MetricConfig[] {
+    return scoreTotals?.sociability_breakdown != null ? SOCIABILITY_DIMENSION_METRICS : SOCIABILITY_TOTAL_METRICS;
+}
 
 // Percentage cutoffs where the legacy bar color used to change. Now rendered as
 // horizontal dotted lines across each bar, labeled at the start of each group.
@@ -91,7 +134,12 @@ function barColorForMetric(key: MetricKey, isNa: boolean, ds: ReturnType<typeof 
             return ds.colors.variety;
         case "challenge":
             return ds.colors.challenge;
+        // One colour for all four Sociability bars: the three opportunities are equal measures, so
+        // a per-dimension palette would read as a ranking.
         case "sociability":
+        case "sociability_play_alone":
+        case "sociability_small_group":
+        case "sociability_large_group":
             return ds.colors.sociability;
         case "play_value":
             return ds.colors.playValue;
@@ -333,25 +381,43 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
     const trackHeight = layout.isTablet ? 180 : 144;
     const barWidth = layout.isTablet ? 50 : 38;
 
-    // ── Tablet layout - single bar row + joined table (web parity) ─────────────────
+    const sociabilityMetrics = resolveSociabilityMetrics(scoreTotals);
+    // Keeps the Sociability group the same width whether it shows three opportunities or the single
+    // legacy aggregate, so a `5.31` report has no stranded narrow column.
+    const sociabilityDataColWidth = getSociabilityDataColumnWidth(tableLayout, sociabilityMetrics.length);
+
+    const getColWidth = (metric: MetricConfig): number => {
+        if (CONSTRUCT_METRICS.some((construct) => construct.key === metric.key)) {
+            return tableLayout.rightDataColWidth;
+        }
+        return sociabilityMetrics.some((sociability) => sociability.key === metric.key)
+            ? sociabilityDataColWidth
+            : tableLayout.leftDataColWidth;
+    };
+
+    // ── Tablet layout - three bar groups over the matching three tables (web parity) ────
+    //
+    // Both rows lay their groups out side by side with the same `$4` gap and the same per-group
+    // widths, so every bar stays directly above its own table column.
     if (layout.isTablet) {
         return (
             <YStack gap="$3" width="100%">
                 <ScrollView horizontal showsHorizontalScrollIndicator>
-                    <BarBlock
-                        metrics={ALL_BAR_METRICS}
-                        scoreTotals={scoreTotals}
-                        getColWidth={(m) =>
-                            SCALE_METRICS.some((s) => s.key === m.key)
-                                ? tableLayout.leftDataColWidth
-                                : tableLayout.rightDataColWidth
-                        }
-                        barWidth={barWidth}
-                        trackHeight={trackHeight}
-                        labelColWidth={tableLayout.labelColWidth}
-                        ds={ds}
-                        t={t}
-                    />
+                    <XStack gap="$4" items="flex-end">
+                        {[SCALE_METRICS, sociabilityMetrics, CONSTRUCT_METRICS].map((metrics, groupIndex) => (
+                            <BarBlock
+                                key={metrics[0]?.key ?? `group-${groupIndex.toString()}`}
+                                metrics={metrics}
+                                scoreTotals={scoreTotals}
+                                getColWidth={getColWidth}
+                                barWidth={barWidth}
+                                trackHeight={trackHeight}
+                                labelColWidth={tableLayout.labelColWidth}
+                                ds={ds}
+                                t={t}
+                            />
+                        ))}
+                    </XStack>
                 </ScrollView>
 
                 <DomainScoreTable scoreTotals={scoreTotals} itemCount={itemCount} />
@@ -359,18 +425,19 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
         );
     }
 
-    // ── Phone layout: two independently scrollable groups ──────────────────
+    // ── Phone layout: three independently scrollable groups ──────────────────
     //
-    // On phone, the right (PVU) sub-table uses leftDataColWidth for both its
-    // columns (same as DomainScoreTable does internally), so PVU bars also
-    // use leftDataColWidth to stay in sync.
+    // `useReportScoreTableLayout` sizes every group to the same content track: the scale columns
+    // divide it three ways and the construct columns two ways, so all three groups end up the
+    // same width and none of them gains a horizontal scroll the others lack.
     //
-    const phoneBarWidth = barWidth; // 38px
-    const phoneLeftDataColWidth = tableLayout.leftDataColWidth; // 72px
-    const phoneRightDataColWidth = tableLayout.rightDataColWidth; // 144px
-    const phoneLabelColWidth = tableLayout.labelColWidth; // 120px
+    const phoneBarWidth = barWidth;
+    const phoneLeftDataColWidth = tableLayout.leftDataColWidth;
+    const phoneRightDataColWidth = tableLayout.rightDataColWidth;
+    const phoneLabelColWidth = tableLayout.labelColWidth;
 
     const scaleGroupWidth = phoneLabelColWidth + phoneLeftDataColWidth * SCALE_METRICS.length;
+    const sociabilityGroupWidth = tableLayout.sociabilityTableWidth;
     const constructGroupWidth = phoneLabelColWidth + phoneRightDataColWidth * CONSTRUCT_METRICS.length;
 
     const renderPhoneSection = (
@@ -378,7 +445,8 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
         groupWidth: number,
         dataColWidth: number,
         sectionLabelKey: string,
-        tableGroup: "scale" | "construct",
+        tableGroup: PhoneSubTableGroup,
+        footnote?: string,
     ) => (
         <YStack gap="$1" width="100%">
             {/* Section label */}
@@ -419,6 +487,17 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
                     />
                 </YStack>
             </ScrollView>
+
+            {footnote === undefined ? null : (
+                <Text
+                    color={ds.colors.mutedForeground}
+                    fontFamily={ds.fonts.bodyMedium}
+                    fontSize={ds.typography.bodyXs.fontSize}
+                    lineHeight={ds.typography.bodyXs.lineHeight}
+                >
+                    {footnote}
+                </Text>
+            )}
         </YStack>
     );
 
@@ -430,6 +509,16 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
                 phoneLeftDataColWidth,
                 "domain.barRowScaleScores",
                 "scale",
+            )}
+            {renderPhoneSection(
+                sociabilityMetrics,
+                sociabilityGroupWidth,
+                sociabilityDataColWidth,
+                "domain.barRowSociability",
+                "sociability",
+                scoreTotals?.sociability_breakdown == null
+                    ? t("domain.sociabilityBreakdownNotCaptured", { ns: "reports" })
+                    : undefined,
             )}
             {renderPhoneSection(
                 CONSTRUCT_METRICS,
@@ -444,8 +533,10 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
 
 // ── PhoneSubTable ─────────────────────────────────────────────────────────────
 
+type PhoneSubTableGroup = "scale" | "sociability" | "construct";
+
 interface PhoneSubTableProps {
-    readonly group: "scale" | "construct";
+    readonly group: PhoneSubTableGroup;
     readonly scoreTotals: AuditScoreTotals | null;
     readonly itemCount: number;
     readonly tableWidth: number;
@@ -481,6 +572,30 @@ const SCALE_COLDEFS: readonly ColDef[] = [
         value: (r) => r.challenge_total,
         max: (r) => r.challenge_total_max,
     },
+];
+
+const SOCIABILITY_DIMENSION_COLDEFS: readonly ColDef[] = [
+    {
+        key: "sociability_play_alone",
+        headerKey: "extendedTable.columnSociabilityPlayAlone",
+        value: (r) => r.sociability_breakdown?.play_alone.total ?? 0,
+        max: (r) => r.sociability_breakdown?.play_alone.max ?? 0,
+    },
+    {
+        key: "sociability_small_group",
+        headerKey: "extendedTable.columnSociabilitySmallGroup",
+        value: (r) => r.sociability_breakdown?.small_group.total ?? 0,
+        max: (r) => r.sociability_breakdown?.small_group.max ?? 0,
+    },
+    {
+        key: "sociability_large_group",
+        headerKey: "extendedTable.columnSociabilityLargeGroup",
+        value: (r) => r.sociability_breakdown?.large_group.total ?? 0,
+        max: (r) => r.sociability_breakdown?.large_group.max ?? 0,
+    },
+];
+
+const SOCIABILITY_TOTAL_COLDEFS: readonly ColDef[] = [
     {
         key: "sociability",
         headerKey: "extendedTable.columnSociability",
@@ -503,6 +618,18 @@ const CONSTRUCT_COLDEFS: readonly ColDef[] = [
         max: (r) => r.usability_total_max,
     },
 ];
+
+/** Choose the columns for one phone group, falling back to the Sociability aggregate when the
+ * source instrument never captured the three opportunities. */
+function resolvePhoneColumns(group: PhoneSubTableGroup, scoreTotals: AuditScoreTotals | null): readonly ColDef[] {
+    if (group === "scale") {
+        return SCALE_COLDEFS;
+    }
+    if (group === "construct") {
+        return CONSTRUCT_COLDEFS;
+    }
+    return scoreTotals?.sociability_breakdown != null ? SOCIABILITY_DIMENSION_COLDEFS : SOCIABILITY_TOTAL_COLDEFS;
+}
 
 function cellVal(totals: AuditScoreTotals | null, fn: (r: AuditScoreTotals) => number): string {
     if (totals === null) return "-";
@@ -529,7 +656,7 @@ function PhoneSubTable({
     ds,
     t,
 }: PhoneSubTableProps) {
-    const columns = group === "scale" ? SCALE_COLDEFS : CONSTRUCT_COLDEFS;
+    const columns = resolvePhoneColumns(group, scoreTotals);
 
     const rows = [
         {

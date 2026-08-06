@@ -6,7 +6,7 @@ import type { AuditScoreTotals } from "lib/audit/types";
 import { formatScoreValue } from "lib/audit/score-helpers";
 import { useDesignSystem } from "lib/design-system";
 import { useResponsiveLayout } from "lib/responsive-layout";
-import { useReportScoreTableLayout } from "lib/report-table-layout";
+import { getSociabilityDataColumnWidth, useReportScoreTableLayout } from "lib/report-table-layout";
 
 export interface DomainScoreTableProps {
     readonly scoreTotals: AuditScoreTotals | null;
@@ -59,6 +59,37 @@ const LEFT_COLUMNS: readonly ColumnDef[] = [
         max: (r) => r.challenge_total_max,
         headerKey: "extendedTable.columnChallenge",
     },
+];
+
+/**
+ * Sociability as three independent opportunities.
+ *
+ * Column order is storage order, not rank - the three carry equal weight and share one column
+ * width, so nothing in the table suggests one opportunity outranks another.
+ */
+export const SOCIABILITY_DIMENSION_COLUMNS: readonly ColumnDef[] = [
+    {
+        key: "sociability_play_alone",
+        value: (r) => r.sociability_breakdown?.play_alone.total ?? 0,
+        max: (r) => r.sociability_breakdown?.play_alone.max ?? 0,
+        headerKey: "extendedTable.columnSociabilityPlayAlone",
+    },
+    {
+        key: "sociability_small_group",
+        value: (r) => r.sociability_breakdown?.small_group.total ?? 0,
+        max: (r) => r.sociability_breakdown?.small_group.max ?? 0,
+        headerKey: "extendedTable.columnSociabilitySmallGroup",
+    },
+    {
+        key: "sociability_large_group",
+        value: (r) => r.sociability_breakdown?.large_group.total ?? 0,
+        max: (r) => r.sociability_breakdown?.large_group.max ?? 0,
+        headerKey: "extendedTable.columnSociabilityLargeGroup",
+    },
+];
+
+/** Sociability as one aggregate, for instruments that never captured the three opportunities. */
+export const SOCIABILITY_TOTAL_COLUMNS: readonly ColumnDef[] = [
     {
         key: "sociability",
         value: (r) => r.sociability_total,
@@ -66,6 +97,11 @@ const LEFT_COLUMNS: readonly ColumnDef[] = [
         headerKey: "extendedTable.columnSociability",
     },
 ];
+
+/** Pick the Sociability columns that match what the source instrument actually captured. */
+export function resolveSociabilityColumns(scoreTotals: AuditScoreTotals | null): readonly ColumnDef[] {
+    return scoreTotals?.sociability_breakdown != null ? SOCIABILITY_DIMENSION_COLUMNS : SOCIABILITY_TOTAL_COLUMNS;
+}
 
 const RIGHT_COLUMNS: readonly ColumnDef[] = [
     {
@@ -82,7 +118,8 @@ const RIGHT_COLUMNS: readonly ColumnDef[] = [
     },
 ];
 
-const ALL_COLUMNS: readonly ColumnDef[] = [...LEFT_COLUMNS, ...RIGHT_COLUMNS];
+export { LEFT_COLUMNS as SCALE_COLUMNS, RIGHT_COLUMNS as CONSTRUCT_COLUMNS };
+export type { ColumnDef as ReportScoreColumnDef };
 
 function isConstructColumn(col: ColumnDef): boolean {
     return col.key === "play_value" || col.key === "usability";
@@ -245,8 +282,12 @@ function ScoreSubTable({
 }
 
 /**
- * Score achieved / max tables / item count: four scale columns + two construct columns.
- * On tablet, one joined table; on phone, two stacked tables. Aligns with web `ScoreSubTable`.
+ * Score achieved / max / item count in three separately scrollable tables: the scored scales, the
+ * Sociability opportunities, and the two headline constructs.
+ *
+ * The groups stay separate on every screen size. Joining all eight measures into one table would
+ * squeeze each column past the point where the numbers stay readable. Aligns with web
+ * `AlignedScoreDisplay`.
  */
 export const DomainScoreTable = memo(function DomainScoreTable({ scoreTotals, itemCount }: DomainScoreTableProps) {
     const layout = useResponsiveLayout();
@@ -259,62 +300,94 @@ export const DomainScoreTable = memo(function DomainScoreTable({ scoreTotals, it
         { text: t("domain.itemsContributingLabel", { ns: "reports" }) },
     ];
 
+    const sociabilityColumns = resolveSociabilityColumns(scoreTotals);
+    const capturesDimensions = scoreTotals?.sociability_breakdown != null;
+    const sociabilityDataColWidth = getSociabilityDataColumnWidth(tableLayout, sociabilityColumns.length);
+
     const getWidthForColumn = (col: ColumnDef): number => {
-        return isConstructColumn(col) ? tableLayout.rightDataColWidth : tableLayout.leftDataColWidth;
+        if (isConstructColumn(col)) {
+            return tableLayout.rightDataColWidth;
+        }
+        return isSociabilityColumn(col) ? sociabilityDataColWidth : tableLayout.leftDataColWidth;
     };
 
+    const commonProps = {
+        scoreTotals,
+        itemCount,
+        labels,
+        getColumnWidth: getWidthForColumn,
+        labelColWidth: tableLayout.labelColWidth,
+    } as const;
+
+    const scaleTable = (
+        <ScoreSubTable {...commonProps} columns={LEFT_COLUMNS} tableWidth={tableLayout.leftTableWidth} />
+    );
+    const sociabilityTable = (
+        <YStack gap="$1.5">
+            <ScoreSubTable
+                {...commonProps}
+                columns={sociabilityColumns}
+                tableWidth={tableLayout.sociabilityTableWidth}
+            />
+            {capturesDimensions ? null : (
+                <SociabilityNotCapturedNote
+                    text={t("domain.sociabilityBreakdownNotCaptured", { ns: "reports" })}
+                    width={tableLayout.sociabilityTableWidth}
+                />
+            )}
+        </YStack>
+    );
+    const constructTable = (
+        <ScoreSubTable {...commonProps} columns={RIGHT_COLUMNS} tableWidth={tableLayout.rightTableWidth} />
+    );
+
+    // Tablet lays the three groups out side by side in one scroller, matching the bar row above so
+    // every bar still sits directly over its own column. The gap must stay in step with the
+    // `XStack` gap in `DomainScoreDisplay`.
     if (layout.isTablet) {
         return (
-            <YStack gap="$2" minW="100%">
-                <ScrollView horizontal showsHorizontalScrollIndicator>
-                    <ScoreSubTable
-                        columns={ALL_COLUMNS}
-                        scoreTotals={scoreTotals}
-                        itemCount={itemCount}
-                        labels={labels}
-                        getColumnWidth={(col) => {
-                            return getWidthForColumn(col);
-                        }}
-                        tableWidth={tableLayout.joinedTableWidth}
-                        labelColWidth={tableLayout.labelColWidth}
-                    />
-                </ScrollView>
-            </YStack>
+            <ScrollView horizontal showsHorizontalScrollIndicator style={{ width: "100%" }}>
+                <XStack gap="$4" items="flex-start">
+                    {scaleTable}
+                    {sociabilityTable}
+                    {constructTable}
+                </XStack>
+            </ScrollView>
         );
     }
 
-    const commonLeftProps = {
-        columns: LEFT_COLUMNS,
-        scoreTotals,
-        itemCount,
-        labels,
-        getColumnWidth: (col: ColumnDef) => {
-            return getWidthForColumn(col);
-        },
-        tableWidth: tableLayout.leftTableWidth,
-        labelColWidth: tableLayout.labelColWidth,
-    } as const;
-
-    const commonRightProps = {
-        columns: RIGHT_COLUMNS,
-        scoreTotals,
-        itemCount,
-        labels,
-        getColumnWidth: (col: ColumnDef) => {
-            return getWidthForColumn(col);
-        },
-        tableWidth: tableLayout.rightTableWidth,
-        labelColWidth: tableLayout.labelColWidth,
-    } as const;
-
     return (
-        <YStack gap="$2" width="100%">
+        <YStack gap="$3" width="100%">
             <ScrollView horizontal showsHorizontalScrollIndicator>
-                <ScoreSubTable {...commonLeftProps} />
+                {scaleTable}
             </ScrollView>
             <ScrollView horizontal showsHorizontalScrollIndicator>
-                <ScoreSubTable {...commonRightProps} />
+                {sociabilityTable}
+            </ScrollView>
+            <ScrollView horizontal showsHorizontalScrollIndicator>
+                {constructTable}
             </ScrollView>
         </YStack>
     );
 });
+
+function isSociabilityColumn(col: ColumnDef): boolean {
+    return col.key === "sociability" || col.key.startsWith("sociability_");
+}
+
+/** Explain an absent breakdown instead of leaving three empty columns to be read as zeros. */
+function SociabilityNotCapturedNote({ text, width }: Readonly<{ text: string; width: number }>) {
+    const ds = useDesignSystem();
+
+    return (
+        <Text
+            width={width}
+            color={ds.colors.mutedForeground}
+            fontFamily={ds.fonts.bodyMedium}
+            fontSize={ds.typography.bodyXs.fontSize}
+            lineHeight={ds.typography.bodyXs.lineHeight}
+        >
+            {text}
+        </Text>
+    );
+}

@@ -6,6 +6,13 @@ import {
     formatPercentage,
     getEffectiveAuditScoreTotals,
 } from "lib/audit/score-helpers";
+import {
+    buildSociabilityExportCells,
+    formatMultipleSociabilityAnswer,
+    getSociabilityScale,
+    SOCIABILITY_CATEGORY_KEYS,
+    SOCIABILITY_EXPORT_HEADERS,
+} from "lib/audit/sociability";
 import type {
     AuditScoreTotals,
     InstrumentQuestion,
@@ -43,6 +50,52 @@ import {
 import { isQuestionVisible } from "./row-builders";
 
 const palette = WEB_AUDIT_EXPORT_PALETTE;
+
+/** True when a question's Sociability scale accepts any combination of its answers. */
+function isMultipleSociabilityQuestion(question: InstrumentQuestion): boolean {
+    return getSociabilityScale(question)?.selection_mode === "multiple";
+}
+
+/**
+ * Render the play opportunities an auditor selected, one per line.
+ *
+ * The wording comes from the instrument's own option labels via the shared formatter, so the
+ * printed answer matches the on-screen report and the spreadsheet cells.
+ */
+function formatSociabilityAnswerForExport(question: InstrumentQuestion, answers: QuestionResponsePayload): string {
+    const formatted = formatMultipleSociabilityAnswer(question, answers);
+    if (formatted.length > 0) {
+        return formatted.split(" | ").join("\n");
+    }
+    // Every structural column carries the same non-selection state for this question.
+    return buildSociabilityExportCells(question, answers)[0];
+}
+
+/** One score row per play opportunity, or a single line stating the breakdown was never captured. */
+function buildSociabilityBreakdownScoreRows(totals: AuditScoreTotals | null): readonly ScoreSummaryDisplayRow[] {
+    const breakdown = totals?.sociability_breakdown;
+    if (breakdown === null || breakdown === undefined) {
+        return [
+            {
+                label: "Sociability Breakdown",
+                value: "Not captured by this instrument",
+                className: "score-row scale-sociability",
+            },
+        ];
+    }
+
+    return SOCIABILITY_CATEGORY_KEYS.map((categoryKey, index) => {
+        const category = breakdown[categoryKey];
+        return {
+            label: SOCIABILITY_EXPORT_HEADERS[index] ?? categoryKey,
+            value: `${formatScoreValue(category.total)} / ${formatScoreValue(category.max)} (${formatPercentage(
+                category.total,
+                category.max,
+            )})`,
+            className: "score-row scale-sociability",
+        };
+    });
+}
 
 /** Build the web-styled single-audit PDF HTML used by Expo Print. */
 export function buildSingleAuditPdfHtml(exportableAudit: ExportableAudit, instrument: PlayspaceInstrument): string {
@@ -96,6 +149,9 @@ export function buildSingleAuditPdfHtml(exportableAudit: ExportableAudit, instru
             value: formatScoreValue(overallScores?.challenge_total ?? 0),
             className: "score-row scale-challenge",
         },
+        // The three play opportunities follow the Sociability aggregate as their own block. All
+        // three share the Sociability fill so the printed page reads them as equal measures.
+        ...buildSociabilityBreakdownScoreRows(overallScores),
         ...buildUnsureScoreRows(auditSession),
     ];
 
@@ -365,13 +421,17 @@ function renderPdfQuestionRow(
     const varietyAnswer = isChecklist
         ? ""
         : formatQuestionAnswer(question, "variety", typeof answers.variety === "string" ? answers.variety : undefined);
+    // A multi-answer Sociability scale stores an array, so the shared formatter decides what the
+    // cell says; the scalar path stays untouched for historical instruments.
     const sociabilityAnswer = isChecklist
         ? ""
-        : formatQuestionAnswer(
-              question,
-              "sociability",
-              typeof answers.sociability === "string" ? answers.sociability : undefined,
-          );
+        : isMultipleSociabilityQuestion(question)
+          ? formatSociabilityAnswerForExport(question, answers)
+          : formatQuestionAnswer(
+                question,
+                "sociability",
+                typeof answers.sociability === "string" ? answers.sociability : undefined,
+            );
     const challengeAnswer = isChecklist
         ? ""
         : formatQuestionAnswer(

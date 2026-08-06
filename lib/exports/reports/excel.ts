@@ -129,7 +129,7 @@ export function styleWorkbookSheet(sheet: XLSX.WorkSheet, table: WorkbookTable):
 
             const scaleKey = SCALE_COLUMN_MAP[colIndex];
             const isScaleCol = scaleKey !== undefined;
-            const isPvUCol = colIndex === 11 || colIndex === 12;
+            const isPvUCol = colIndex === 14 || colIndex === 15;
 
             const baseStyle = {
                 alignment: {

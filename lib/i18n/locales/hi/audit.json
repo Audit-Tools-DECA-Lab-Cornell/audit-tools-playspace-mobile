@@ -220,5 +220,10 @@
     },
     "startAudit": "ऑडिट शुरू करें",
     "submit": "ऑडिट सबमिट करें",
+    "multiSelect": {
+        "hint": "जो भी लागू हो, वे सभी विकल्प चुनें।",
+        "required": "इस प्रश्न का उत्तर देने के लिए कम से कम एक विकल्प चुनें।",
+        "selectedCount": "{{total}} में से {{count}} चुने गए"
+    },
     "thisPlayspace": "यह playspace..."
 }

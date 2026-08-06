@@ -170,14 +170,31 @@ describe("SubmitOutbox storage", () => {
     });
 
     it("does not collide with the editing-store key namespace", () => {
+        const editingBlob = JSON.stringify({
+            sessions_by_audit_id: {
+                "audit-1": {
+                    sections: {
+                        section_a: {
+                            responses: {
+                                q1: { sociability: ["play_alone", "large_group"] },
+                            },
+                        },
+                    },
+                },
+            },
+        });
         const { storage, entries } = createFakeStorage({
-            "audit.state.v4.user-a": "{editing-blob}",
+            "audit.state.v4.user-a": editingBlob,
         });
         const outbox = new SubmitOutbox(storage);
         outbox.put("user-a", createSubmitOp("audit-1", "2026-06-12T00:00:00.000Z"));
 
         // The editing blob is untouched; outbox keys live under their own prefix.
-        expect(entries.get("audit.state.v4.user-a")).toBe("{editing-blob}");
+        expect(entries.get("audit.state.v4.user-a")).toBe(editingBlob);
+        expect(
+            JSON.parse(entries.get("audit.state.v4.user-a") ?? "{}").sessions_by_audit_id["audit-1"].sections.section_a
+                .responses.q1.sociability,
+        ).toEqual(["play_alone", "large_group"]);
         expect([...entries.keys()].some((key) => key.startsWith("audit.outbox.v1."))).toBe(true);
     });
 });
