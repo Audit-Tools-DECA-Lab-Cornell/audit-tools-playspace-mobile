@@ -263,7 +263,7 @@
                         "domains": ["Playspace Character & Community"],
                         "options": [],
                         "required": true,
-                        "constructs": ["usability", "play_value"],
+                        "constructs": ["usability"],
                         "section_key": "section_1_playspace_character_community",
                         "question_key": "q_1_5",
                         "question_type": "scaled"
@@ -1699,53 +1699,6 @@
                     },
                     {
                         "mode": "survey",
-                        "prompt": "is designed and/or maintained to provide protection from inclement weather/sun/wind through **placement of features and/or landscaping** (e.g. wind screen provided by evergreen planting)",
-                        "scales": [
-                            {
-                                "key": "provision",
-                                "title": "Provision",
-                                "prompt": "To what degree is this feature/environmental characteristic present or considered?",
-                                "options": [
-                                    {
-                                        "key": "no",
-                                        "label": "No",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "some",
-                                        "label": "Some",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "a_lot",
-                                        "label": "A lot",
-                                        "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    }
-                                ]
-                            }
-                        ],
-                        "domains": ["Climate Protection & Adaptability"],
-                        "options": [],
-                        "required": true,
-                        "constructs": ["usability"],
-                        "section_key": "section_6_climate_protection_adaptability",
-                        "question_key": "q_6_3",
-                        "question_type": "scaled"
-                    },
-                    {
-                        "mode": "survey",
                         "prompt": "has **appropriate lighting for the geographic location and local conditions** to ensure feelings of safety and to extend play times (e.g., lighting suitable for winter months, evenings or changing weather conditions, and/or lit paths into the playspace)",
                         "scales": [
                             {
@@ -1914,67 +1867,6 @@
                     },
                     {
                         "mode": "audit",
-                        "prompt": "has fences/boundaries **that are visually permeable**, allowing for easy observation/supervision into adjacent spaces",
-                        "scales": [
-                            {
-                                "key": "provision",
-                                "title": "Provision",
-                                "prompt": "To what degree is this feature/environmental characteristic present or considered?",
-                                "options": [
-                                    {
-                                        "key": "not_applicable",
-                                        "label": "Not Applicable",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": true,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "no",
-                                        "label": "No",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "some",
-                                        "label": "Some",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "a_lot",
-                                        "label": "A lot",
-                                        "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    }
-                                ]
-                            }
-                        ],
-                        "domains": ["Boundaries & Entrances"],
-                        "options": [],
-                        "required": true,
-                        "constructs": ["usability"],
-                        "display_if": {
-                            "question_key": "q_7_1",
-                            "response_key": "provision",
-                            "any_of_option_keys": ["some", "a_lot"]
-                        },
-                        "section_key": "section_7_boundaries_entrances",
-                        "question_key": "q_7_2",
-                        "question_type": "scaled"
-                    },
-                    {
-                        "mode": "audit",
                         "prompt": "... any **gates can be easily opened by adults** (including those with limited grip strength or from a wheelchair/mobility device)",
                         "scales": [
                             {
@@ -2114,7 +2006,7 @@
                                         "is_unsure": false,
                                         "boost_value": 1,
                                         "addition_value": 0,
-                                        "is_not_applicable": false,
+                                        "is_not_applicable": true,
                                         "allows_follow_up_scales": false
                                     },
                                     {
@@ -2185,7 +2077,7 @@
                         "domains": ["Accommodating diverse abilities"],
                         "options": [],
                         "required": true,
-                        "constructs": ["play_value", "usability"],
+                        "constructs": ["usability"],
                         "section_key": "section_8_pathways",
                         "question_key": "q_8_1",
                         "question_type": "scaled"
@@ -5941,75 +5833,6 @@
                                         "allows_follow_up_scales": false
                                     }
                                 ]
-                            },
-                            {
-                                "key": "challenge",
-                                "title": "Challenge Opportunities",
-                                "prompt": "To what extent does this feature/environmental characteristic provide different levels of challenge?",
-                                "options": [
-                                    {
-                                        "key": "no_challenge",
-                                        "label": "No Challenge",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "some_challenge",
-                                        "label": "Some Challenge",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "a_lot_of_challenge",
-                                        "label": "A lot of Challenge",
-                                        "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    }
-                                ]
-                            },
-                            {
-                                "key": "sociability",
-                                "title": "Sociability Support",
-                                "prompt": "Does this feature/environmental characteristic provide opportunities for a child to",
-                                "options": [
-                                    {
-                                        "key": "play_alone",
-                                        "label": "Play on their own",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "small_group",
-                                        "label": "Play together in a small group (1-4 other users)",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "large_group",
-                                        "label": "Play together in a larger group (5 or more other users)",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    }
-                                ],
-                                "selection_mode": "multiple"
                             }
                         ],
                         "domains": ["Loose Manufactured Parts & Equipment"],
@@ -6066,6 +5889,53 @@
                         "section_key": "section_14_loose_manufactured_parts_equipment",
                         "question_key": "q_14_4_1",
                         "question_type": "checklist"
+                    },
+                    {
+                        "mode": "survey",
+                        "prompt": "**Staff provide manufactured loose parts for play**",
+                        "scales": [
+                            {
+                                "key": "provision",
+                                "title": "Frequency",
+                                "prompt": "How often do staff provide manufactured loose parts for play?",
+                                "options": [
+                                    {
+                                        "key": "never",
+                                        "label": "Never",
+                                        "is_unsure": false,
+                                        "boost_value": 1,
+                                        "addition_value": 0,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "sometimes",
+                                        "label": "Sometimes",
+                                        "is_unsure": false,
+                                        "boost_value": 2,
+                                        "addition_value": 1,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    },
+                                    {
+                                        "key": "always",
+                                        "label": "Always",
+                                        "is_unsure": false,
+                                        "boost_value": 3,
+                                        "addition_value": 2,
+                                        "is_not_applicable": false,
+                                        "allows_follow_up_scales": false
+                                    }
+                                ]
+                            }
+                        ],
+                        "domains": ["Loose Manufactured Parts & Equipment"],
+                        "options": [],
+                        "required": true,
+                        "constructs": ["play_value"],
+                        "section_key": "section_14_loose_manufactured_parts_equipment",
+                        "question_key": "q_14_5",
+                        "question_type": "scaled"
                     }
                 ],
                 "description": "**Loose Manufactured Parts & Equipment** refers to **smaller, human-made play objects** such balls/frisbees or other toys, sand/mud/water play toys, bikes/scooters, go-carts. These may be always available in the playspace or stored onsite in bins/sheds.",
@@ -8481,87 +8351,6 @@
                         "constructs": ["play_value"],
                         "section_key": "section_19_novelty",
                         "question_key": "q_19_5",
-                        "question_type": "scaled"
-                    },
-                    {
-                        "mode": "audit",
-                        "prompt": "has internal or external **boundaries/edges ** around play areas **with embedded play opportuntites** (e.g. playable hedge; stumps/rocks wrapping around a play area affording jumping/running along; interactive features or peek-a-boo openings in fences/space dividers)",
-                        "scales": [
-                            {
-                                "key": "provision",
-                                "title": "Provision",
-                                "prompt": "To what degree is this feature/environmental characteristic present or considered?",
-                                "options": [
-                                    {
-                                        "key": "no",
-                                        "label": "No",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "some",
-                                        "label": "Some",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": true
-                                    },
-                                    {
-                                        "key": "a_lot",
-                                        "label": "A lot",
-                                        "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": true
-                                    }
-                                ]
-                            },
-                            {
-                                "key": "variety",
-                                "title": "Variety",
-                                "prompt": "To what extent is there variety in the provision of this feature/environmental characteristic?",
-                                "options": [
-                                    {
-                                        "key": "no_variety",
-                                        "label": "No Variety",
-                                        "is_unsure": false,
-                                        "boost_value": 1,
-                                        "addition_value": 0,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "some_variety",
-                                        "label": "Some Variety",
-                                        "is_unsure": false,
-                                        "boost_value": 2,
-                                        "addition_value": 1,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    },
-                                    {
-                                        "key": "a_lot_of_variety",
-                                        "label": "A lot of Variety",
-                                        "is_unsure": false,
-                                        "boost_value": 3,
-                                        "addition_value": 2,
-                                        "is_not_applicable": false,
-                                        "allows_follow_up_scales": false
-                                    }
-                                ]
-                            }
-                        ],
-                        "domains": ["Novelty"],
-                        "options": [],
-                        "required": true,
-                        "constructs": ["play_value"],
-                        "section_key": "section_19_novelty",
-                        "question_key": "q_19_6",
                         "question_type": "scaled"
                     },
                     {
@@ -11556,7 +11345,7 @@
                 "last_updated": "July 1, 2026"
             }
         ],
-        "instrument_version": "5.32",
+        "instrument_version": "5.33",
         "pre_audit_questions": [
             {
                 "key": "auditor_code",

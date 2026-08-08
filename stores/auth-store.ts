@@ -1,3 +1,5 @@
+import { requestAccountDeletion } from "lib/account/deletion-api";
+import { purgeLocalAccountData } from "lib/account/purge";
 import { unregisterAuditBackgroundTaskAsync } from "lib/audit/background-sync";
 import { AuthApiError, changePassword, loginWithPassword, requestAccess, signupWithPassword } from "lib/auth/api";
 import { clearAuthSession, readAuthSession, saveAuthSession } from "lib/auth/storage";
@@ -25,6 +27,11 @@ export interface AuthStoreState {
     signup: (payload: SignupPayload) => Promise<void>;
     requestAccess: (payload: AccessRequestPayload) => Promise<void>;
     changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+    /**
+     * Permanently delete the signed-in account, then erase what it left on this
+     * device. Rejects without touching local state when the server refuses.
+     */
+    deleteAccount: (currentPassword: string) => Promise<void>;
     /** Patch the stored session's nextStep without requiring a full re-login. */
     updateNextStep: (nextStep: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -189,6 +196,42 @@ export const useAuthStore = create<AuthStoreState>((set, get) => ({
 
             throw error;
         }
+    },
+
+    deleteAccount: async (currentPassword: string) => {
+        const session = get().session;
+        if (session === null) {
+            throw new Error("Not authenticated.");
+        }
+
+        set(() => ({
+            isSubmitting: true,
+            errorMessage: null,
+        }));
+
+        try {
+            // Nothing local is touched until the server confirms the deletion.
+            // A rejected or unreachable request leaves the session, the audit
+            // snapshot, and every queued submission exactly as they were.
+            await requestAccountDeletion(session, currentPassword);
+        } catch (error) {
+            set(() => ({
+                isSubmitting: false,
+                errorMessage: toAuthErrorMessage(error),
+            }));
+            throw error;
+        }
+
+        // The account no longer exists: the local copy of its work has nowhere
+        // left to sync, so it is erased rather than preserved as sign-out does.
+        await purgeLocalAccountData(session.user.id);
+
+        set(() => ({
+            session: null,
+            status: "unauthenticated",
+            isSubmitting: false,
+            errorMessage: null,
+        }));
     },
 
     updateNextStep: async (nextStep: string) => {

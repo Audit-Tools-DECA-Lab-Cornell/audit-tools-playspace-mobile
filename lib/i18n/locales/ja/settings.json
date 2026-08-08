@@ -119,5 +119,82 @@
             "missingNumber": "Must include a number.",
             "noMatch": "Passwords do not match."
         }
+    },
+    "deleteAccount": {
+        "entry": "アカウントを削除",
+        "title": "アカウントを削除",
+        "subtitle": "ログイン情報と個人情報を Playspace から削除します。",
+        "steps": {
+            "one": "ステップ 1/2 · 削除するとどうなるか",
+            "two": "ステップ 2/2 · ご本人かどうかの確認"
+        },
+        "unreachable": {
+            "title": "Playspace に接続できません",
+            "message": "アカウント情報を読み込めませんでした。接続を確認してもう一度お試しください。"
+        },
+        "review": {
+            "submittedOne": "完了した監査 1 件はそのまま残ります",
+            "submittedOther": "完了した監査 {{count}} 件はそのまま残ります",
+            "submittedDetail": "すでに送信した監査は、レポートが引き続き使えるように組織に残ります。監査からお名前は削除されます。",
+            "draftsOne": "未送信の監査 1 件が削除されます",
+            "draftsOther": "未送信の監査 {{count}} 件が削除されます",
+            "draftsDetail": "開始したものの送信していない監査は、あなただけのものです。元に戻すことはできません。",
+            "assignmentsOne": "担当場所 1 件が終了します",
+            "assignmentsOther": "担当場所 {{count}} 件が終了します",
+            "assignmentsDetail": "マネージャーがこれらの場所を別の監査担当者に割り当てられます。",
+            "device": "この端末はサインアウトされ、データが消去されます",
+            "deviceDetail": "監査、下書き、保存された情報がこの端末から削除されます。",
+            "permanent": "この操作は元に戻せません。再び Playspace を使うには、新しい招待が必要になります。"
+        },
+        "confirm": {
+            "passwordLabel": "パスワード",
+            "passwordPlaceholder": "パスワードを入力",
+            "wordLabel": "確認のため DELETE と入力してください",
+            "wordHint": "DELETE と大文字で入力してください。",
+            "wordMismatch": "DELETE と大文字で正確に入力してください。"
+        },
+        "actions": {
+            "back": "戻る",
+            "checkAgain": "もう一度確認",
+            "continue": "次へ",
+            "delete": "アカウントを削除する",
+            "deleting": "削除しています…",
+            "keepAccount": "アカウントを残す"
+        },
+        "errors": {
+            "wrongPassword": "パスワードが一致しません。もう一度お試しください。",
+            "confirmationWord": "DELETE と大文字で正確に入力してください。",
+            "notAllowed": "このアカウントはアプリから削除できません。マネージャーにご連絡ください。",
+            "offline": "オフラインのようです。接続し直してからお試しください。",
+            "changedSinceReview": "アカウントの状況が変わりました。削除する前に内容をもう一度ご確認ください。",
+            "generic": "アカウントを削除できませんでした。もう一度お試しください。"
+        },
+        "done": {
+            "title": "アカウントを削除しました",
+            "message": "ログイン情報と個人情報は削除されました。完了した監査は組織に残ります。",
+            "action": "完了"
+        },
+        "blocked": {
+            "stillSending": {
+                "title": "完了した作業をまだ送信しています",
+                "message": "この端末で完了した監査がまだ Playspace に届いていません（残り {{count}} 件）。インターネットに接続して送信が終わるのをお待ちください。その後アカウントを削除できます。"
+            },
+            "serverStillReceiving": {
+                "title": "監査をまだ保存しています",
+                "message": "送信された作業を Playspace がまだ保存しています（{{count}} 件処理中）。数分後にもう一度お試しください。"
+            },
+            "mainContact": {
+                "title": "あなたは組織の主担当者です",
+                "message": "組織には必ず主担当者が必要です。Playspace のウェブサイトで別のマネージャーに引き継いでください。その後アカウントを削除できます。"
+            },
+            "handoverNeeded": {
+                "title": "先に引き継ぎが必要な作業があります",
+                "message": "アカウントには組織に属する作業が残っています。マネージャーに引き継ぎを依頼してください。その後アカウントを削除できます。"
+            },
+            "unavailable": {
+                "title": "現在アカウントを削除できません",
+                "message": "マネージャーにご連絡ください。"
+            }
+        }
     }
 }

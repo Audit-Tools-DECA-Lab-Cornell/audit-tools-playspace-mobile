@@ -23,7 +23,32 @@ const instrument = playspaceInstrumentSchema.parse({
             description: null,
         },
     ],
-    pre_audit_questions: [],
+    pre_audit_questions: [
+        {
+            key: "place_size",
+            label: "Approximate size of the playspace",
+            input_type: "single_select",
+            required: true,
+            page_key: "space_setup",
+            options: [{ key: "large", label: "Large" }],
+        },
+        {
+            key: "current_users_6_12",
+            label: "Current users aged 6-12",
+            input_type: "single_select",
+            required: false,
+            page_key: "space_setup",
+            options: [{ key: "a_few", label: "A few" }],
+        },
+        {
+            key: "weather_conditions",
+            label: "Weather during the audit",
+            input_type: "multi_select",
+            required: false,
+            page_key: "space_setup",
+            options: [{ key: "cloudy_overcast", label: "Cloudy / overcast" }],
+        },
+    ],
     scale_guidance: [],
     sections: [
         {
@@ -122,14 +147,14 @@ const inProgressAuditSession = auditSessionSchema.parse({
         execution_mode: "audit",
     },
     pre_audit: {
-        place_size: null,
+        place_size: "large",
         current_users_0_5: null,
-        current_users_6_12: null,
+        current_users_6_12: "a_few",
         current_users_13_17: null,
         current_users_18_plus: null,
         playspace_busyness: null,
         season: null,
-        weather_conditions: [],
+        weather_conditions: ["cloudy_overcast"],
         wind_conditions: null,
     },
     sections: {
@@ -257,7 +282,13 @@ describe("in-progress audit export", () => {
         );
 
         expect(workbook.fileBaseName.startsWith("pvua-in-progress-")).toBe(true);
-        expect(workbook.tables.map((table) => table.name)).toEqual(["Overview", "PreAudit", "Responses"]);
+        expect(workbook.tables.map((table) => table.name)).toEqual(["SpaceAudit", "Overview", "PreAudit", "Responses"]);
+        expect(workbook.tables.find((table) => table.name === "SpaceAudit")?.rows).toEqual([
+            ["Question", "Recorded Answer"],
+            ["Approximate size of the playspace", "Large"],
+            ["Current users aged 6-12", "A few"],
+            ["Weather during the audit", "Cloudy / overcast"],
+        ]);
     });
 
     it("includes mode-specific questions when the audit was executed in 'both' mode", () => {

@@ -44,6 +44,8 @@
         "overallScoreHint": "Max scores:",
         "pendingMetric": "Pending submission",
         "playValueCardLabel": "Play value",
+        "playspaceContext": "Playspace context",
+        "notProvided": "Not provided",
         "progress": "Progress",
         "project": "Project",
         "questionsAnswered": "{{answered}} / {{total}} questions answered",

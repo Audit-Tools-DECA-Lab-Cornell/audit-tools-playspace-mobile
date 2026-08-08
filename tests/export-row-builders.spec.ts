@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { COMMENT_ROW_SENTINEL } from "lib/exports/reports/types";
-import { buildOverviewRows, buildSingleAuditResponseRows } from "lib/exports/reports/row-builders";
+import { buildSingleAuditPdfHtml } from "lib/exports/reports/pdf";
+import {
+    buildOverviewRows,
+    buildSingleAuditResponseRows,
+    buildSingleAuditWorkbook,
+} from "lib/exports/reports/row-builders";
 import { auditSessionSchema, playspaceInstrumentSchema } from "lib/audit/types";
 
 describe("audit export row builders", () => {
@@ -20,7 +25,35 @@ describe("audit export row builders", () => {
                     description: null,
                 },
             ],
-            pre_audit_questions: [],
+            pre_audit_questions: [
+                {
+                    key: "place_size",
+                    label: "Approximate size of the playspace",
+                    input_type: "single_select",
+                    required: true,
+                    page_key: "space_setup",
+                    options: [{ key: "large", label: "Large" }],
+                },
+                {
+                    key: "current_users_0_5",
+                    label: "Current users aged 0-5",
+                    input_type: "single_select",
+                    required: false,
+                    page_key: "space_setup",
+                    options: [{ key: "a_few", label: "A few" }],
+                },
+                {
+                    key: "weather_conditions",
+                    label: "Weather during the audit",
+                    input_type: "multi_select",
+                    required: false,
+                    page_key: "space_setup",
+                    options: [
+                        { key: "sunshine", label: "Sunshine" },
+                        { key: "light_rain", label: "Light rain" },
+                    ],
+                },
+            ],
             scale_guidance: [],
             sections: [],
             legal_documents: [],
@@ -50,14 +83,14 @@ describe("audit export row builders", () => {
                 final_comments: "Visibility was strongest from the north path after sunset.",
             },
             pre_audit: {
-                place_size: null,
-                current_users_0_5: null,
+                place_size: "large",
+                current_users_0_5: "a_few",
                 current_users_6_12: null,
                 current_users_13_17: null,
                 current_users_18_plus: null,
                 playspace_busyness: null,
                 season: null,
-                weather_conditions: [],
+                weather_conditions: ["sunshine", "light_rain"],
                 wind_conditions: null,
             },
             sections: {},
@@ -91,6 +124,23 @@ describe("audit export row builders", () => {
         );
 
         expect(rows).toContainEqual(["Final Comments", "Visibility was strongest from the north path after sunset."]);
+
+        const spaceAuditTable = buildSingleAuditWorkbook(
+            { auditSession, context: null, auditorProfile: null },
+            instrument,
+        ).tables.find((table) => table.name === "SpaceAudit");
+        expect(spaceAuditTable?.rows).toEqual([
+            ["Question", "Recorded Answer"],
+            ["Approximate size of the playspace", "Large"],
+            ["Current users aged 0-5", "A few"],
+            ["Weather during the audit", "Sunshine | Light rain"],
+        ]);
+
+        const pdfHtml = buildSingleAuditPdfHtml({ auditSession, context: null, auditorProfile: null }, instrument);
+        expect(pdfHtml).toContain("Space Audit Setup");
+        expect(pdfHtml).toContain("Approximate size of the playspace");
+        expect(pdfHtml).toContain("Current users aged 0-5");
+        expect(pdfHtml).toContain("Weather during the audit");
     });
 
     it("emits a question comment row when a response stores question_note", () => {

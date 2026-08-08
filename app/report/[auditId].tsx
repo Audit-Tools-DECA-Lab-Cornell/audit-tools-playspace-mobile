@@ -18,6 +18,11 @@ import {
 } from "lib/audit/report-helpers";
 import { fetchAuditSession } from "lib/audit/api";
 import { shareSingleAuditExport, type AuditExportFormat } from "lib/exports/reports";
+import {
+    joinDisplayValues,
+    readPreAuditQuestionValues,
+    resolvePreAuditDisplayValues,
+} from "lib/exports/reports/format-utils";
 import { buildExportableAuditForPlace, loadOptionalExportAuditorProfile } from "lib/exports/reports/helpers";
 import type { AuditorPlace } from "lib/audit/places-api";
 import { deriveLocality, derivePlaceRequirementStatus } from "lib/audit/place-helpers";
@@ -771,6 +776,26 @@ export default function AuditReportDetailScreen() {
         return countUniqueScaledQuestionsWithDomains(instrument);
     }, [instrument]);
 
+    const playspaceContextRows = useMemo(() => {
+        if (auditSession === null || instrument === null) {
+            return [];
+        }
+
+        return instrument.pre_audit_questions
+            .filter((question) => question.page_key === "space_setup")
+            .map((question) => ({
+                key: question.key,
+                label: question.label,
+                value:
+                    joinDisplayValues(
+                        resolvePreAuditDisplayValues(
+                            question,
+                            readPreAuditQuestionValues(auditSession, null, question),
+                        ),
+                    ) || t("detail.notProvided", { ns: "reports" }),
+            }));
+    }, [auditSession, instrument, t]);
+
     const showExportSuccess = useCallback(
         (fileName: string) => {
             toast.show(t("exportReadyTitle", { ns: "reports" }), {
@@ -972,6 +997,21 @@ export default function AuditReportDetailScreen() {
                                     value={`${auditSession.progress.answered_visible_questions}/${auditSession.progress.total_visible_questions}`}
                                 />
                             </SurfaceCard>
+
+                            {playspaceContextRows.length === 0 ? null : (
+                                <SurfaceCard>
+                                    <Text
+                                        color={ds.colors.foreground}
+                                        fontFamily={ds.fonts.bodyBold}
+                                        fontSize={ds.typography.titleMd.fontSize}
+                                    >
+                                        {t("detail.playspaceContext", { ns: "reports" })}
+                                    </Text>
+                                    {playspaceContextRows.map((row) => (
+                                        <MetadataRow key={row.key} label={row.label} value={row.value} />
+                                    ))}
+                                </SurfaceCard>
+                            )}
 
                             {place === undefined ? null : (
                                 <SurfaceCard>

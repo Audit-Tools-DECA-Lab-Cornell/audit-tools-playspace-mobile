@@ -44,6 +44,8 @@
         "overallScoreHint": "Spielfeld + Benutzerfreundlichkeit",
         "pendingMetric": "Wartet auf Einreichung",
         "playValueCardLabel": "Spielfeld",
+        "playspaceContext": "Spielplatz-Kontext",
+        "notProvided": "Nicht angegeben",
         "progress": "Fortschritt",
         "project": "Projekt",
         "questionsAnswered": "{{answered}} / {{total}} Fragen beantwortet",

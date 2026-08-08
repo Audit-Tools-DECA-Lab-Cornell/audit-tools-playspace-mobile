@@ -1,10 +1,9 @@
 import { createModuleLogger } from "lib/logger";
 import { mmkvStorage } from "lib/storage/mmkv";
+import { submitOutboxOpKey, submitOutboxOpKeyPrefix, submitOutboxQuarantineKey } from "lib/audit/outbox/outbox-keys";
 import { submitOutboxOpSchema, type OutboxKeyValueStorage, type SubmitOutboxOp } from "lib/audit/outbox/types";
 
 const log = createModuleLogger("submit-outbox");
-
-const OUTBOX_PREFIX = "audit.outbox.v1";
 
 /**
  * Append-only, per-op submit outbox backed by individual key-value entries.
@@ -25,11 +24,11 @@ export class SubmitOutbox {
     }
 
     private opKey(userId: string, auditId: string): string {
-        return `${OUTBOX_PREFIX}.${encodeURIComponent(userId)}.submit.${encodeURIComponent(auditId)}`;
+        return submitOutboxOpKey(userId, auditId);
     }
 
     private opKeyPrefix(userId: string): string {
-        return `${OUTBOX_PREFIX}.${encodeURIComponent(userId)}.submit.`;
+        return submitOutboxOpKeyPrefix(userId);
     }
 
     /** List all pending submit ops for one user, quarantining unreadable rows. */
@@ -90,7 +89,7 @@ export class SubmitOutbox {
         } catch (error) {
             log.withError(error).error("failed to parse submit outbox op");
         }
-        const quarantineKey = key.replace(".submit.", ".corrupt.");
+        const quarantineKey = submitOutboxQuarantineKey(key);
         try {
             this.storage.set(quarantineKey, raw);
         } catch (error) {

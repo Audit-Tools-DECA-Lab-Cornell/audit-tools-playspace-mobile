@@ -1,0 +1,83 @@
+# Account deletion flow: review → confirm → signed out.
+#
+# Verifies the journey an auditor actually takes:
+#   1. Settings offers "Delete account".
+#   2. Step 1 states what stays with the organisation and what is removed.
+#   3. Step 2 requires the current password AND the literal word DELETE.
+#   4. A wrong confirmation word is refused before anything is sent.
+#   5. A correct confirmation deletes the account and returns to the login screen.
+#
+# DESTRUCTIVE - RUN AGAINST A SEEDED TEST ACCOUNT ONLY:
+#   This flow permanently deletes the account it signs in as. Point it at a
+#   disposable seeded auditor and reseed afterwards; never run it against an
+#   account holding real field work.
+#
+# BLOCKED-STATE VARIANT (cannot be automated here):
+#   To exercise the blocked path, enable airplane mode, submit an audit so it
+#   queues on the device, then open Settings → Delete account. The screen shows
+#   testID="delete-account-blocked" with plain-language guidance and no way to
+#   continue. That precondition needs a manual radio toggle, so it is documented
+#   rather than scripted.
+#
+# testIDs used (all stable, declared in app/settings/delete-account.tsx):
+#   delete-account-entry, delete-account-password, delete-account-confirmation,
+#   delete-account-submit, delete-account-done, delete-account-blocked
+#
+# Android appId: com.pratyush.sudhakar.audittoolsplayspacemobile
+# iOS bundleId: com.pratyush.sudhakar.audit-tools-playspace-mobile
+appId: com.pratyush.sudhakar.audittoolsplayspacemobile
+---
+# ── Step 1: Sign in as the disposable seeded auditor. ──────────────────────
+- runFlow: login.yaml
+
+# ── Step 2: Open Settings and start deletion. ──────────────────────────────
+- tapOn:
+      id: "settings-tab"
+      optional: true
+- extendedWaitUntil:
+      visible:
+          id: "delete-account-entry"
+      timeout: 20000
+- tapOn:
+      id: "delete-account-entry"
+
+# ── Step 3: Step one must state the outcome before anything is confirmed. ──
+- extendedWaitUntil:
+      visible: ".*stays.*|.*removed.*|.*cannot be undone.*"
+      timeout: 20000
+- assertVisible: ".*cannot be undone.*"
+
+# A blocked account stops here by design; the rest of the flow assumes a
+# clean account with nothing queued.
+- assertNotVisible:
+      id: "delete-account-blocked"
+
+- tapOn: "Continue"
+
+# ── Step 4: Confirmation is refused unless the word is exact. ──────────────
+- tapOn:
+      id: "delete-account-password"
+- inputText: "DemoPass123!"
+- tapOn:
+      id: "delete-account-confirmation"
+- inputText: "delete"
+- assertVisible: ".*capital letters.*"
+
+# ── Step 5: Correct the confirmation word and delete. ──────────────────────
+- eraseText
+- inputText: "DELETE"
+- tapOn:
+      id: "delete-account-submit"
+
+# ── Step 6: Deletion is acknowledged, then the session ends. ───────────────
+- extendedWaitUntil:
+      visible:
+          id: "delete-account-done"
+      timeout: 30000
+- assertVisible: ".*deleted.*"
+- tapOn: "Done"
+
+# Back at the signed-out entry point: the deleted login no longer has a session.
+- extendedWaitUntil:
+      visible: ".*Sign in.*|.*Log in.*"
+      timeout: 20000

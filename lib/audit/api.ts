@@ -229,6 +229,59 @@ export async function requestJson(
     init: RequestInit,
     options?: RequestJsonOptions,
 ): Promise<unknown> {
+    const response = await performAuthenticatedRequest(session, path, init, options);
+
+    try {
+        return await response.json();
+    } catch {
+        throw new PlayspaceAuditApiError(
+            t("playspaceAuditServiceReturnedInvalidJson", "COPA audit service returned invalid JSON."),
+            500,
+        );
+    }
+}
+
+/**
+ * Execute an authenticated playspace API request that returns no body.
+ *
+ * Same transport, timeout, and error semantics as `requestJson`, but the
+ * response body is never read - the caller only cares that the request
+ * succeeded. Use for endpoints that answer `204 No Content`, where parsing JSON
+ * would fail on an empty body.
+ *
+ * @param session Authenticated mobile session.
+ * @param path Backend path relative to the API root.
+ * @param init Fetch request options.
+ * @param options Per-call overrides such as `timeoutMs`.
+ */
+export async function requestNoContent(
+    session: AuthSession,
+    path: string,
+    init: RequestInit,
+    options?: RequestJsonOptions,
+): Promise<void> {
+    await performAuthenticatedRequest(session, path, init, options);
+}
+
+/**
+ * Shared transport for authenticated playspace requests: applies the auth
+ * headers, enforces the timeout, and converts transport and HTTP failures into
+ * `PlayspaceAuditApiError`. Returns the raw successful response so callers
+ * decide whether a body is expected.
+ *
+ * @param session Authenticated mobile session.
+ * @param path Backend path relative to the API root.
+ * @param init Fetch request options. `init.signal` is honored alongside the
+ *   built-in timeout signal.
+ * @param options Per-call overrides.
+ * @returns The successful response, body unread.
+ */
+async function performAuthenticatedRequest(
+    session: AuthSession,
+    path: string,
+    init: RequestInit,
+    options?: RequestJsonOptions,
+): Promise<Response> {
     const baseUrl = getApiBaseUrl();
     const timeoutMs = options?.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
 
@@ -293,14 +346,7 @@ export async function requestJson(
         );
     }
 
-    try {
-        return await response.json();
-    } catch {
-        throw new PlayspaceAuditApiError(
-            t("playspaceAuditServiceReturnedInvalidJson", "COPA audit service returned invalid JSON."),
-            500,
-        );
-    }
+    return response;
 }
 
 /**
