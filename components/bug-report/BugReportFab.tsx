@@ -173,23 +173,28 @@ export function BugReportFab() {
         [releaseScreenshot],
     );
 
-    // Restore any locally-saved draft when the sheet opens.
+    const accountId = session?.user.id ?? null;
+
+    // Restore this account's locally-saved draft when the sheet opens. A draft
+    // left by another auditor on a shared device is never restored here.
     useEffect(() => {
         if (!open) return;
-        const draft = readBugReportDraft();
+        if (accountId === null) return;
+        const draft = readBugReportDraft(accountId);
         if (draft) {
             setTitle(draft.title);
             setDescription(draft.description);
             setSeverity(draft.severity);
         }
-    }, [open]);
+    }, [open, accountId]);
 
     // Persist the draft as the reporter types so it survives going offline.
     useEffect(() => {
         if (!open) return;
+        if (accountId === null) return;
         if (title.length === 0 && description.length === 0) return;
-        saveBugReportDraft({ title, description, severity });
-    }, [open, title, description, severity]);
+        saveBugReportDraft({ title, description, severity, accountId });
+    }, [open, title, description, severity, accountId]);
 
     const segment0 = String(segments[0] ?? "");
     const isVisible = isBugReportingEnabled() && session !== null && AUTHENTICATED_GROUPS.has(segment0);
@@ -252,6 +257,7 @@ export function BugReportFab() {
             description: description.trim(),
             severity,
             context,
+            ...(accountId ? { accountId } : {}),
             ...(context.project_id ? { projectId: context.project_id } : {}),
             ...(context.place_id ? { placeId: context.place_id } : {}),
             ...(context.playspace_submission_id ? { submissionId: context.playspace_submission_id } : {}),
@@ -283,6 +289,7 @@ export function BugReportFab() {
         // report is already queued and will be retried on the next flush prompt.
         void flushPendingBugReports(session);
     }, [
+        accountId,
         canSubmit,
         description,
         hasCheckedMatches,

@@ -23,6 +23,14 @@ export interface PendingBugReport {
     submissionId?: string;
     /** Durable on-device URI of the captured screenshot, if one was attached. */
     screenshotLocalUri?: string;
+    /**
+     * Account that filed the report. This queue survives sign-out and is shared
+     * by every auditor who has used the device, so the owner decides who may
+     * submit it and whose account deletion may remove it. Absent only on entries
+     * written before account tagging; those have no established owner, so they
+     * are neither submitted under someone else's session nor deleted.
+     */
+    accountId?: string;
 }
 
 const QUEUE_STORAGE_KEY = "playspace.bugReport.queue.v1";

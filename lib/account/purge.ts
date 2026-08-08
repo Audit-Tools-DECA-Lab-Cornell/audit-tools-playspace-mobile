@@ -2,7 +2,12 @@ import { unregisterAuditBackgroundTaskAsync } from "lib/audit/background-sync";
 import { clearAuthSession } from "lib/auth/storage";
 import { deleteLocalScreenshot, readPendingBugReports } from "lib/bug-report/queue";
 import { createModuleLogger } from "lib/logger";
-import { selectAccountPurgeKeys } from "lib/account/deletion-plan";
+import {
+    partitionEntriesByOwner,
+    selectAccountPurgeKeys,
+    SHARED_QUEUE_KEYS,
+    type AccountOwnedEntry,
+} from "lib/account/deletion-plan";
 import { mmkvStorage } from "lib/storage/mmkv";
 import { useNotificationsStore } from "stores/notifications-store";
 import { usePlacesStore } from "stores/places-store";
@@ -17,6 +22,8 @@ const log = createModuleLogger("account-purge");
 export interface AccountPurgeStorage {
     getAllKeys(): string[];
     remove(key: string): void;
+    getString(key: string): string | undefined;
+    set(key: string, value: string): void;
 }
 
 /**
@@ -42,17 +49,19 @@ export async function purgeLocalAccountData(userId: string, storage: AccountPurg
     await usePlayspaceAuditStore.getState().clearStoredState(userId);
 
     // Screenshot files live outside the key-value store, so their references
-    // have to be read before the queue that holds them is deleted.
-    deleteQueuedBugReportScreenshots();
+    // have to be read before the queue that holds them is rewritten.
+    deleteOwnedBugReportScreenshots(userId);
 
-    const { accountScopedKeys, signedInAccountKeys } = selectAccountPurgeKeys(storage.getAllKeys(), userId);
-    for (const key of [...accountScopedKeys, ...signedInAccountKeys]) {
+    const { accountScopedKeys, sessionCacheKeys } = selectAccountPurgeKeys(storage.getAllKeys(), userId);
+    for (const key of [...accountScopedKeys, ...sessionCacheKeys]) {
         try {
             storage.remove(key);
         } catch (error) {
             log.withError(error).error("failed to remove a stored key during account deletion");
         }
     }
+
+    pruneSharedQueues(userId, storage);
 
     resetInMemoryStores();
 
@@ -63,19 +72,78 @@ export async function purgeLocalAccountData(userId: string, storage: AccountPurg
 }
 
 /**
- * Delete screenshot files attached to bug reports that never got sent.
- * Best-effort: an orphaned file is harmless, and a failure here must not stop
- * the rest of the purge.
+ * Delete screenshot files attached to unsent reports **this account** filed.
+ *
+ * Another auditor's screenshots are left on disk: the queue is shared across
+ * sign-outs, and their report still needs its attachment. Best-effort - an
+ * orphaned file is harmless, and a failure here must not stop the purge.
  */
-function deleteQueuedBugReportScreenshots(): void {
+function deleteOwnedBugReportScreenshots(userId: string): void {
     try {
-        for (const report of readPendingBugReports()) {
+        const { owned } = partitionEntriesByOwner(readPendingBugReports(), userId);
+        for (const report of owned) {
             if (typeof report.screenshotLocalUri === "string" && report.screenshotLocalUri.length > 0) {
                 deleteLocalScreenshot(report.screenshotLocalUri);
             }
         }
     } catch (error) {
         log.withError(error).error("failed to remove queued bug report screenshots during account deletion");
+    }
+}
+
+/**
+ * Remove this account's entries from the queues that outlive sign-out, leaving
+ * every other auditor's untouched.
+ *
+ * These keys are rewritten rather than deleted. On a shared field device the bug
+ * report queue, its draft, and the submit-failure notices can all hold unsent
+ * work belonging to someone who simply signed out - destroying it would be
+ * irreversible and is not this operation's to do.
+ */
+function pruneSharedQueues(userId: string, storage: AccountPurgeStorage): void {
+    pruneSharedList(SHARED_QUEUE_KEYS.bugReportQueue, userId, storage);
+    pruneSharedList(SHARED_QUEUE_KEYS.submitFailureNotifications, userId, storage);
+    pruneSharedRecord(SHARED_QUEUE_KEYS.bugReportDraft, userId, storage);
+}
+
+/** Rewrite a stored array, dropping only the deleted account's entries. */
+function pruneSharedList(key: string, userId: string, storage: AccountPurgeStorage): void {
+    try {
+        const raw = storage.getString(key);
+        if (raw === undefined) {
+            return;
+        }
+        const parsed = JSON.parse(raw) as unknown;
+        if (!Array.isArray(parsed)) {
+            return;
+        }
+        const { retained } = partitionEntriesByOwner(parsed as AccountOwnedEntry[], userId);
+        if (retained.length === parsed.length) {
+            return;
+        }
+        if (retained.length === 0) {
+            storage.remove(key);
+            return;
+        }
+        storage.set(key, JSON.stringify(retained));
+    } catch (error) {
+        log.withError(error).error(`failed to prune ${key} during account deletion`);
+    }
+}
+
+/** Remove a single stored object only when the deleted account owns it. */
+function pruneSharedRecord(key: string, userId: string, storage: AccountPurgeStorage): void {
+    try {
+        const raw = storage.getString(key);
+        if (raw === undefined) {
+            return;
+        }
+        const parsed = JSON.parse(raw) as AccountOwnedEntry;
+        if (parsed !== null && typeof parsed === "object" && parsed.accountId === userId) {
+            storage.remove(key);
+        }
+    } catch (error) {
+        log.withError(error).error(`failed to prune ${key} during account deletion`);
     }
 }
 

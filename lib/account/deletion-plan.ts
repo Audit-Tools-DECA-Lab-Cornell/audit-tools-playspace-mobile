@@ -133,7 +133,7 @@ export function isConfirmationWordValid(typed: string): boolean {
     return typed.trim() === DELETION_CONFIRMATION_WORD;
 }
 
-/** Storage keys a confirmed deletion removes, grouped by what owns them. */
+/** Storage keys a confirmed deletion removes outright. */
 export interface AccountPurgeKeys {
     /**
      * Keys carrying the deleted account's own field work. Every entry is proven
@@ -141,34 +141,82 @@ export interface AccountPurgeKeys {
      */
     readonly accountScopedKeys: readonly string[];
     /**
-     * Unscoped keys holding only the signed-in account's data. They carry no
-     * account id, so they are listed separately and only ever cleared for the
-     * account that is signed in at deletion time.
+     * Caches that sign-out already empties, so at deletion time they can only
+     * hold the account being deleted.
      */
-    readonly signedInAccountKeys: readonly string[];
+    readonly sessionCacheKeys: readonly string[];
 }
 
 /**
- * Unscoped keys that hold data belonging to whoever is signed in.
+ * Keys that hold nothing but the signed-in account's data.
+ *
+ * `notifications_cache` qualifies only because `logout()` clears it, so a second
+ * auditor's notices can never still be sitting there when this runs. Do not add
+ * a key here unless sign-out provably empties it.
  *
  * Deliberately excluded: `playspace.preferences.v1` (device display and
  * accessibility settings, not account data - a shared field device should keep
  * its text size and contrast) and the instrument cache (the shared audit
  * definition, identical for every account).
  */
-const SIGNED_IN_ACCOUNT_KEYS: readonly string[] = [
-    "playspace.bugReport.queue.v1",
-    "playspace.bugReport.draft.v1",
-    "playspace.submit_failure_notifications",
-    "notifications_cache",
-];
+const SESSION_CACHE_KEYS: readonly string[] = ["notifications_cache"];
 
 /**
- * Select every storage key a confirmed account deletion may remove.
+ * Queues that outlive sign-out and are therefore shared by every account that
+ * has used this device.
+ *
+ * These are **rewritten entry by entry**, never removed: deleting one wholesale
+ * would destroy unsent work belonging to a different auditor, which is
+ * irreversible and not this operation's to take.
+ */
+export const SHARED_QUEUE_KEYS = {
+    bugReportQueue: "playspace.bugReport.queue.v1",
+    bugReportDraft: "playspace.bugReport.draft.v1",
+    submitFailureNotifications: "playspace.submit_failure_notifications",
+} as const;
+
+/** An entry in a device-shared queue, tagged with the account that created it. */
+export interface AccountOwnedEntry {
+    readonly accountId?: string | undefined;
+}
+
+/** Entries split by whether the deleted account owns them. */
+export interface OwnedEntryPartition<T> {
+    /** Owned by the deleted account; safe to remove. */
+    readonly owned: readonly T[];
+    /** Belongs to someone else, or has no provable owner; must survive. */
+    readonly retained: readonly T[];
+}
+
+/**
+ * Split a shared queue into what the deleted account owns and what must stay.
+ *
+ * Entries written before account tagging carry no `accountId`. They are
+ * **retained**, not discarded: ownership cannot be proven, and wrongly deleting
+ * another auditor's unsent report is permanent, whereas leaving an untagged
+ * entry only means it flushes on its next successful submit.
+ *
+ * @param entries Every entry currently in the queue.
+ * @param accountId Account being deleted.
+ * @returns The owned and retained partitions.
+ */
+export function partitionEntriesByOwner<T extends AccountOwnedEntry>(
+    entries: readonly T[],
+    accountId: string,
+): OwnedEntryPartition<T> {
+    const owned = entries.filter((entry) => entry.accountId === accountId);
+    const retained = entries.filter((entry) => entry.accountId !== accountId);
+
+    return { owned, retained };
+}
+
+/**
+ * Select every storage key a confirmed account deletion may remove outright.
  *
  * Account-scoped keys are matched against the deleted account's id, so keys
  * belonging to any other account that has used this device are never selected -
- * including ids where one is a leading substring of another.
+ * including ids where one is a leading substring of another. Device-shared
+ * queues are handled separately by `partitionEntriesByOwner`.
  *
  * @param allKeys Every key currently in local storage.
  * @param userId Account being deleted.
@@ -179,7 +227,7 @@ export function selectAccountPurgeKeys(allKeys: readonly string[], userId: strin
     const accountScopedKeys = allKeys.filter(
         (key) => isAuditStateKeyForUser(key, userId) || key.startsWith(outboxPrefix),
     );
-    const signedInAccountKeys = allKeys.filter((key) => SIGNED_IN_ACCOUNT_KEYS.includes(key));
+    const sessionCacheKeys = allKeys.filter((key) => SESSION_CACHE_KEYS.includes(key));
 
-    return { accountScopedKeys, signedInAccountKeys };
+    return { accountScopedKeys, sessionCacheKeys };
 }

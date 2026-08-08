@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
     blockReasonCopyKey,
     isConfirmationWordValid,
+    partitionEntriesByOwner,
     resolveDeletionGate,
     selectAccountPurgeKeys,
     type DeletionBlockReason,
@@ -75,11 +76,28 @@ describe("selectAccountPurgeKeys", () => {
 
         const selected = selectAccountPurgeKeys(keys, ACCOUNT);
 
-        expect(selected.signedInAccountKeys).toContain("playspace.bugReport.queue.v1");
-        expect(selected.signedInAccountKeys).toContain("notifications_cache");
+        // Sign-out empties this one, so it can only hold the account being deleted.
+        expect(selected.sessionCacheKeys).toContain("notifications_cache");
         // Display and accessibility settings belong to the shared device, not the person.
-        expect(selected.signedInAccountKeys).not.toContain("playspace.preferences.v1");
-        expect(selected.signedInAccountKeys).not.toContain("playspace.instrument.cache.v1");
+        expect(selected.sessionCacheKeys).not.toContain("playspace.preferences.v1");
+        expect(selected.sessionCacheKeys).not.toContain("playspace.instrument.cache.v1");
+    });
+
+    it("never removes a device-shared queue outright", () => {
+        const keys = [
+            "playspace.bugReport.queue.v1",
+            "playspace.bugReport.draft.v1",
+            "playspace.submit_failure_notifications",
+        ];
+
+        const selected = selectAccountPurgeKeys(keys, ACCOUNT);
+
+        // These survive sign-out and can hold another auditor's unsent work, so
+        // they are pruned entry-by-entry rather than deleted.
+        for (const key of keys) {
+            expect(selected.accountScopedKeys).not.toContain(key);
+            expect(selected.sessionCacheKeys).not.toContain(key);
+        }
     });
 
     it("selects nothing when the device holds only other accounts' data", () => {
@@ -89,7 +107,46 @@ describe("selectAccountPurgeKeys", () => {
         );
 
         expect(selected.accountScopedKeys).toEqual([]);
-        expect(selected.signedInAccountKeys).toEqual([]);
+        expect(selected.sessionCacheKeys).toEqual([]);
+    });
+});
+
+describe("partitionEntriesByOwner", () => {
+    it("claims only the deleted account's entries", () => {
+        const entries = [
+            { id: "a", accountId: ACCOUNT },
+            { id: "b", accountId: NEIGHBOUR },
+            { id: "c", accountId: ACCOUNT },
+        ];
+
+        const { owned, retained } = partitionEntriesByOwner(entries, ACCOUNT);
+
+        expect(owned.map((entry) => entry.id)).toEqual(["a", "c"]);
+        expect(retained.map((entry) => entry.id)).toEqual(["b"]);
+    });
+
+    it("keeps another auditor's unsent bug report on a shared device", () => {
+        const entries = [{ id: "theirs", accountId: NEIGHBOUR }];
+
+        const { owned, retained } = partitionEntriesByOwner(entries, ACCOUNT);
+
+        expect(owned).toEqual([]);
+        expect(retained).toEqual(entries);
+    });
+
+    it("retains untagged legacy entries rather than guessing an owner", () => {
+        // Written before account tagging: ownership cannot be proven, and
+        // wrongly deleting someone else's unsent report is irreversible.
+        const entries = [{ id: "legacy" }, { id: "mine", accountId: ACCOUNT }];
+
+        const { owned, retained } = partitionEntriesByOwner(entries, ACCOUNT);
+
+        expect(owned.map((entry) => entry.id)).toEqual(["mine"]);
+        expect(retained.map((entry) => entry.id)).toEqual(["legacy"]);
+    });
+
+    it("treats an empty queue as nothing to do", () => {
+        expect(partitionEntriesByOwner([], ACCOUNT)).toEqual({ owned: [], retained: [] });
     });
 });
 
