@@ -95,7 +95,7 @@
         "react": "19.2.0",
         "react-dom": "19.2.0",
         "react-i18next": "^16.6.6",
-        "react-native": "0.83.6",
+        "react-native": "0.83.10",
         "react-native-maps": "1.27.2",
         "react-native-mmkv": "^4.3.1",
         "react-native-nitro-modules": "^0.35.9",
