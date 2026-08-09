@@ -10,6 +10,7 @@ import {
     Monitor,
     Moon,
     Sun,
+    Trash2,
     Type,
     User,
 } from "@tamagui/lucide-icons-2";
@@ -644,6 +645,30 @@ export default function SettingsScreen() {
                             .catch(() => undefined);
                     }}
                 />
+
+                {/* Deliberately the lightest control on the page. Deleting an
+                    account is permanent and rarely wanted, so it stays findable
+                    without competing with sign-out for a tired thumb. */}
+                <Button
+                    chromeless
+                    height={layout.compactControlHeight}
+                    rounded={ds.radii.md}
+                    pressStyle={{ opacity: 0.92 }}
+                    onPress={() => router.push("/settings/delete-account")}
+                    accessibilityRole="button"
+                    testID="delete-account-entry"
+                >
+                    <XStack items="center" justify="center" gap="$2">
+                        <Trash2 size={15} color={ds.colors.danger} />
+                        <Text
+                            color={ds.colors.danger}
+                            fontFamily={ds.fonts.bodySemiBold}
+                            fontSize={ds.typography.bodySm.fontSize}
+                        >
+                            {t("deleteAccount.entry", { ns: "settings" })}
+                        </Text>
+                    </XStack>
+                </Button>
             </ScrollView>
 
             {isDirty ? (

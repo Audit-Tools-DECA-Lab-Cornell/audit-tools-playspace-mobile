@@ -143,6 +143,34 @@ describe("flushPendingBugReports - single-flight guard", () => {
         expect(mocks.removePendingBugReport).toHaveBeenCalledWith("r2");
     });
 
+    it("never files another auditor's queued report under this session", async () => {
+        // The queue survives sign-out on a shared field device, so it can hold a
+        // report a different auditor filed and never got online to send.
+        mocks.pendingQueue.push(
+            { ...makePendingReport("mine"), accountId: fakeSession.user.id },
+            { ...makePendingReport("theirs"), accountId: "someone-else" },
+        );
+
+        const result = await flushPendingBugReports(fakeSession);
+
+        expect(result.submitted).toBe(1);
+        expect(mocks.createBugReport).toHaveBeenCalledTimes(1);
+        // Their report stays queued for them - not sent, not dropped.
+        expect(mocks.removePendingBugReport).toHaveBeenCalledTimes(1);
+        expect(mocks.removePendingBugReport).toHaveBeenCalledWith("mine");
+        expect(mocks.removePendingBugReport).not.toHaveBeenCalledWith("theirs");
+    });
+
+    it("still sends untagged reports left by an older app version", async () => {
+        // Refusing these would strand a report the auditor believes they filed.
+        mocks.pendingQueue.push(makePendingReport("legacy"));
+
+        const result = await flushPendingBugReports(fakeSession);
+
+        expect(result.submitted).toBe(1);
+        expect(mocks.removePendingBugReport).toHaveBeenCalledWith("legacy");
+    });
+
     it("two concurrent callers share one in-flight execution - each report POSTed exactly once", async () => {
         // Two reports queued. Two concurrent flush calls should NOT result in
         // four POST calls (each report sent once by each caller).

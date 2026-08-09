@@ -8,3 +8,16 @@ appId: com.pratyush.sudhakar.audittoolsplayspacemobile
 - extendedWaitUntil:
       visible: ".*Report.*|.*Submitted.*|.*Riverside.*"
       timeout: 30000
+- tapOn:
+      text: ".*Riverside.*"
+- extendedWaitUntil:
+      visible: ".*Audit metadata.*"
+      timeout: 30000
+- scrollUntilVisible:
+      element:
+          text: ".*Playspace context.*"
+      direction: DOWN
+      timeout: 15000
+- assertVisible: ".*How large is the playspace.*"
+- assertVisible: ".*0-5 years.*"
+- assertVisible: ".*Current weather conditions.*"

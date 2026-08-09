@@ -22,10 +22,22 @@ export interface FlushResult {
  * `use-flush-prompt.ts`) share one in-flight execution and never POST the same
  * report twice. The backend `BugReportCreateRequest` carries no idempotency key,
  * so single-flight is the only duplicate-submission guard.
+ *
+ * A report tagged to a different account is never sent. The queue outlives
+ * sign-out on a shared field device, so submitting every entry would file
+ * another auditor's report - and their typed words - under whoever happens to be
+ * signed in.
+ *
+ * Untagged entries (written before account tagging) *are* sent. Deletion and
+ * delivery fail in opposite directions here: refusing to delete an unowned entry
+ * costs nothing, but refusing to send one strands a report the auditor believes
+ * they filed. On upgrade those entries belong to the person still signed in.
  */
 export const flushPendingBugReports: (session: AuthSession) => Promise<FlushResult> = createSingleFlightRunner(
     async (session: AuthSession): Promise<FlushResult> => {
-        const pending = readPendingBugReports();
+        const pending = readPendingBugReports().filter(
+            (report) => report.accountId === undefined || report.accountId === session.user.id,
+        );
         let submitted = 0;
         let failed = 0;
 

@@ -119,5 +119,82 @@
             "missingNumber": "Must include a number.",
             "noMatch": "Passwords do not match."
         }
+    },
+    "deleteAccount": {
+        "entry": "Supprimer le compte",
+        "title": "Supprimer le compte",
+        "subtitle": "Retirez votre identifiant et vos données personnelles de Playspace.",
+        "steps": {
+            "one": "Étape 1 sur 2 · Ce qui se passe",
+            "two": "Étape 2 sur 2 · Confirmez votre identité"
+        },
+        "unreachable": {
+            "title": "Playspace est injoignable",
+            "message": "Impossible de charger les informations de votre compte. Vérifiez votre connexion et réessayez."
+        },
+        "review": {
+            "submittedOne": "1 audit terminé est conservé",
+            "submittedOther": "{{count}} audits terminés sont conservés",
+            "submittedDetail": "Les audits que vous avez déjà envoyés restent dans votre organisation afin que ses rapports continuent de fonctionner. Votre nom en est retiré.",
+            "draftsOne": "1 audit non envoyé sera supprimé",
+            "draftsOther": "{{count}} audits non envoyés seront supprimés",
+            "draftsDetail": "Les audits commencés mais jamais envoyés n'appartiennent qu'à vous. Ils ne pourront pas être récupérés.",
+            "assignmentsOne": "1 affectation de lieu prend fin",
+            "assignmentsOther": "{{count}} affectations de lieu prennent fin",
+            "assignmentsDetail": "Votre responsable pourra confier ces lieux à une autre personne chargée des audits.",
+            "device": "Ce téléphone est déconnecté et vidé",
+            "deviceDetail": "Vos audits, brouillons et informations enregistrées sont retirés de ce téléphone.",
+            "permanent": "Cette action est irréversible. Il vous faudrait une nouvelle invitation pour travailler à nouveau avec Playspace."
+        },
+        "confirm": {
+            "passwordLabel": "Votre mot de passe",
+            "passwordPlaceholder": "Saisissez votre mot de passe",
+            "wordLabel": "Tapez DELETE pour confirmer",
+            "wordHint": "Tapez DELETE en majuscules.",
+            "wordMismatch": "Tapez exactement DELETE, en majuscules."
+        },
+        "actions": {
+            "back": "Retour",
+            "checkAgain": "Vérifier à nouveau",
+            "continue": "Continuer",
+            "delete": "Supprimer mon compte",
+            "deleting": "Suppression…",
+            "keepAccount": "Conserver mon compte"
+        },
+        "errors": {
+            "wrongPassword": "Ce mot de passe ne correspond pas. Veuillez réessayer.",
+            "confirmationWord": "Tapez exactement DELETE, en majuscules.",
+            "notAllowed": "Ce compte ne peut pas être supprimé depuis l'application. Veuillez contacter votre responsable.",
+            "offline": "Vous semblez hors ligne. Reconnectez-vous et réessayez.",
+            "changedSinceReview": "Quelque chose a changé sur votre compte. Vérifiez le récapitulatif avant de supprimer.",
+            "generic": "Nous n'avons pas pu supprimer votre compte. Veuillez réessayer."
+        },
+        "done": {
+            "title": "Votre compte est supprimé",
+            "message": "Votre identifiant et vos données personnelles ont disparu. Les audits terminés restent dans votre organisation.",
+            "action": "Terminé"
+        },
+        "blocked": {
+            "stillSending": {
+                "title": "Votre travail terminé est encore en cours d'envoi",
+                "message": "Des audits terminés sur ce téléphone ne sont pas encore arrivés à Playspace ({{count}} en attente). Connectez-vous à Internet et attendez la fin de l'envoi : vous pourrez ensuite supprimer votre compte."
+            },
+            "serverStillReceiving": {
+                "title": "Un audit est encore en cours d'enregistrement",
+                "message": "Playspace enregistre encore le travail que vous avez envoyé ({{count}} en cours). Veuillez réessayer dans quelques minutes."
+            },
+            "mainContact": {
+                "title": "Vous êtes le contact principal de votre organisation",
+                "message": "Chaque organisation a besoin d'un contact principal. Transmettez ce rôle à un autre responsable sur le site web Playspace : vous pourrez ensuite supprimer votre compte."
+            },
+            "handoverNeeded": {
+                "title": "Certains éléments doivent d'abord être transmis",
+                "message": "Votre compte contient encore du travail qui appartient à votre organisation. Demandez à votre responsable de le reprendre : vous pourrez ensuite supprimer votre compte."
+            },
+            "unavailable": {
+                "title": "Vous ne pouvez pas supprimer votre compte pour le moment",
+                "message": "Veuillez contacter votre responsable."
+            }
+        }
     }
 }

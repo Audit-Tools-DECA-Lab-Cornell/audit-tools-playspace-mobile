@@ -119,5 +119,82 @@
             "missingNumber": "Must include a number.",
             "noMatch": "Passwords do not match."
         }
+    },
+    "deleteAccount": {
+        "entry": "Konto löschen",
+        "title": "Konto löschen",
+        "subtitle": "Entfernen Sie Ihren Zugang und Ihre persönlichen Daten aus Playspace.",
+        "steps": {
+            "one": "Schritt 1 von 2 · Was passiert",
+            "two": "Schritt 2 von 2 · Bestätigen Sie, dass Sie es sind"
+        },
+        "unreachable": {
+            "title": "Playspace nicht erreichbar",
+            "message": "Ihre Kontodaten konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+        },
+        "review": {
+            "submittedOne": "1 abgeschlossene Prüfung bleibt erhalten",
+            "submittedOther": "{{count}} abgeschlossene Prüfungen bleiben erhalten",
+            "submittedDetail": "Bereits gesendete Prüfungen bleiben bei Ihrer Organisation, damit deren Berichte weiter funktionieren. Ihr Name wird daraus entfernt.",
+            "draftsOne": "1 nicht gesendete Prüfung wird gelöscht",
+            "draftsOther": "{{count}} nicht gesendete Prüfungen werden gelöscht",
+            "draftsDetail": "Begonnene, aber nie gesendete Prüfungen gehören nur Ihnen. Sie können nicht wiederhergestellt werden.",
+            "assignmentsOne": "1 Ortszuweisung endet",
+            "assignmentsOther": "{{count}} Ortszuweisungen enden",
+            "assignmentsDetail": "Ihre Managerin oder Ihr Manager kann diese Orte einer anderen prüfenden Person zuweisen.",
+            "device": "Dieses Telefon wird abgemeldet und geleert",
+            "deviceDetail": "Ihre Prüfungen, Entwürfe und gespeicherten Daten werden von diesem Telefon entfernt.",
+            "permanent": "Dies kann nicht rückgängig gemacht werden. Für eine erneute Arbeit mit Playspace bräuchten Sie eine neue Einladung."
+        },
+        "confirm": {
+            "passwordLabel": "Ihr Passwort",
+            "passwordPlaceholder": "Passwort eingeben",
+            "wordLabel": "Geben Sie zur Bestätigung DELETE ein",
+            "wordHint": "Geben Sie DELETE in Großbuchstaben ein.",
+            "wordMismatch": "Geben Sie genau DELETE in Großbuchstaben ein."
+        },
+        "actions": {
+            "back": "Zurück",
+            "checkAgain": "Erneut prüfen",
+            "continue": "Weiter",
+            "delete": "Mein Konto löschen",
+            "deleting": "Wird gelöscht …",
+            "keepAccount": "Konto behalten"
+        },
+        "errors": {
+            "wrongPassword": "Dieses Passwort stimmt nicht. Bitte versuchen Sie es erneut.",
+            "confirmationWord": "Geben Sie genau DELETE in Großbuchstaben ein.",
+            "notAllowed": "Dieses Konto kann nicht in der App gelöscht werden. Bitte wenden Sie sich an Ihre Managerin oder Ihren Manager.",
+            "offline": "Sie scheinen offline zu sein. Stellen Sie die Verbindung wieder her und versuchen Sie es erneut.",
+            "changedSinceReview": "An Ihrem Konto hat sich etwas geändert. Bitte prüfen Sie die Übersicht erneut, bevor Sie löschen.",
+            "generic": "Ihr Konto konnte nicht gelöscht werden. Bitte versuchen Sie es erneut."
+        },
+        "done": {
+            "title": "Ihr Konto wurde gelöscht",
+            "message": "Ihr Zugang und Ihre persönlichen Daten sind entfernt. Abgeschlossene Prüfungen bleiben bei Ihrer Organisation.",
+            "action": "Fertig"
+        },
+        "blocked": {
+            "stillSending": {
+                "title": "Ihre abgeschlossene Arbeit wird noch gesendet",
+                "message": "Auf diesem Telefon abgeschlossene Prüfungen haben Playspace noch nicht erreicht ({{count}} ausstehend). Stellen Sie eine Internetverbindung her und warten Sie, bis alles gesendet wurde. Danach können Sie Ihr Konto löschen."
+            },
+            "serverStillReceiving": {
+                "title": "Eine Prüfung wird noch gespeichert",
+                "message": "Playspace speichert noch gesendete Arbeit ({{count}} in Bearbeitung). Bitte versuchen Sie es in einigen Minuten erneut."
+            },
+            "mainContact": {
+                "title": "Sie sind die Hauptkontaktperson Ihrer Organisation",
+                "message": "Jede Organisation braucht eine Hauptkontaktperson. Übergeben Sie diese Rolle auf der Playspace-Website an eine andere Managerin oder einen anderen Manager. Danach können Sie Ihr Konto löschen."
+            },
+            "handoverNeeded": {
+                "title": "Einige Aufgaben müssen zuerst übergeben werden",
+                "message": "Ihr Konto enthält noch Arbeit, die Ihrer Organisation gehört. Bitten Sie Ihre Managerin oder Ihren Manager um die Übergabe. Danach können Sie Ihr Konto löschen."
+            },
+            "unavailable": {
+                "title": "Sie können Ihr Konto derzeit nicht löschen",
+                "message": "Bitte wenden Sie sich an Ihre Managerin oder Ihren Manager."
+            }
+        }
     }
 }

@@ -77,6 +77,7 @@ import { persistedAuditStateSchema } from "lib/audit/types";
 import { t } from "lib/i18n";
 import { getBundledInstrument } from "lib/audit/bundled-instrument";
 import { resolveActiveInstrumentSource } from "lib/audit/instrument-resolution";
+import { auditStateStorageKey } from "lib/audit/storage-keys";
 import { syncInstrument } from "lib/services/instrument-sync";
 import { mmkvStorage } from "lib/storage/mmkv";
 
@@ -199,7 +200,6 @@ interface PlayspaceAuditStoreState {
 // ---------------------------------------------------------------------------
 
 const PERSIST_DEBOUNCE_MS = 500;
-const MMKV_KEY_PREFIX = "audit.state.v4";
 const SUBMIT_FAILURE_NOTIFICATIONS_KEY = "playspace.submit_failure_notifications";
 
 type PersistedAuditDataSnapshot = Pick<
@@ -258,7 +258,7 @@ let hydrateRequestCounter = 0;
 // ---------------------------------------------------------------------------
 
 function getStorageKey(userId: string): string {
-    return `${MMKV_KEY_PREFIX}.${encodeURIComponent(userId)}`;
+    return auditStateStorageKey(userId);
 }
 
 /**

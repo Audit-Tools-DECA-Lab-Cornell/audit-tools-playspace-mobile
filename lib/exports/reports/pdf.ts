@@ -47,7 +47,7 @@ import {
     resolveExecutionMode,
     stripPromptMarkup,
 } from "./format-utils";
-import { isQuestionVisible } from "./row-builders";
+import { buildSingleAuditWorkbook, isQuestionVisible } from "./row-builders";
 
 const palette = WEB_AUDIT_EXPORT_PALETTE;
 
@@ -102,6 +102,9 @@ export function buildSingleAuditPdfHtml(exportableAudit: ExportableAudit, instru
     const { auditSession, auditorProfile } = exportableAudit;
     const overallScores = auditSession.scores.overall;
     const detailsRows = buildAuditDetailsRows(exportableAudit, instrument);
+    const spaceAuditTable = buildSingleAuditWorkbook(exportableAudit, instrument).tables.find(
+        (table) => table.name === "SpaceAudit",
+    );
 
     const profileRows: readonly (readonly [string, SpreadsheetCell])[] = auditorProfile
         ? [
@@ -179,6 +182,14 @@ export function buildSingleAuditPdfHtml(exportableAudit: ExportableAudit, instru
         "</div>",
         renderScoreSummary(scoreRows),
         "</section>",
+        spaceAuditTable === undefined
+            ? ""
+            : [
+                  '<section class="summary-page page-break">',
+                  `<h2>${escapeHtml(spaceAuditTable.title)}</h2>`,
+                  renderGenericTable(spaceAuditTable.rows, spaceAuditTable.name),
+                  "</section>",
+              ].join(""),
         '<section class="response-page">',
         `<h2>${escapeHtml(`${auditSession.audit_code} - ${auditSession.place_name} - PVUA Response Matrix`)}</h2>`,
         renderPdfResponseMatrix(exportableAudit, instrument),

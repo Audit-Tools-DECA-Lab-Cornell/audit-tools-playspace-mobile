@@ -13,11 +13,27 @@ export interface BugReportDraft {
     title: string;
     description: string;
     severity: BugReportSeverity;
+    /**
+     * Account that typed the draft. The key survives sign-out on a shared field
+     * device, so the owner decides whose form it is restored into and whose
+     * account deletion may clear it. Absent only on drafts written before
+     * account tagging.
+     */
+    accountId?: string;
 }
 
 const DRAFT_STORAGE_KEY = "playspace.bugReport.draft.v1";
 
-export function readBugReportDraft(): BugReportDraft | null {
+/**
+ * Read the stored draft, but only when it belongs to the account asking for it.
+ *
+ * A draft written by a previous auditor on a shared device is never restored
+ * into someone else's report form: it holds their typed words.
+ *
+ * @param accountId Account currently signed in.
+ * @returns The draft, or null when there is none or it belongs to someone else.
+ */
+export function readBugReportDraft(accountId: string): BugReportDraft | null {
     try {
         const raw = mmkvStorage.getString(DRAFT_STORAGE_KEY);
         if (raw === undefined) {
@@ -27,11 +43,14 @@ export function readBugReportDraft(): BugReportDraft | null {
         if (typeof parsed.title !== "string" || typeof parsed.description !== "string") {
             return null;
         }
+        if (parsed.accountId !== accountId) {
+            return null;
+        }
         const severity: BugReportSeverity =
             parsed.severity === "blocking" || parsed.severity === "major" || parsed.severity === "minor"
                 ? parsed.severity
                 : "major";
-        return { title: parsed.title, description: parsed.description, severity };
+        return { title: parsed.title, description: parsed.description, severity, accountId };
     } catch {
         return null;
     }
