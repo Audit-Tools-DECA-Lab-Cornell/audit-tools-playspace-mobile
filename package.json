@@ -77,7 +77,7 @@
         "expo-font": "~55.0.8",
         "expo-linking": "~55.0.15",
         "expo-localization": "~55.0.17",
-        "expo-navigation-bar": "~55.0.15",
+        "expo-navigation-bar": "~57.0.2",
         "expo-network": "~55.0.16",
         "expo-print": "~55.0.17",
         "expo-router": "~55.0.17",
