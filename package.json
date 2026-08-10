@@ -86,7 +86,7 @@
         "expo-splash-screen": "~55.0.23",
         "expo-status-bar": "~55.0.6",
         "expo-system-ui": "~55.0.20",
-        "expo-task-manager": "~55.0.18",
+        "expo-task-manager": "~57.0.8",
         "expo-updates": "~55.0.26",
         "expo-web-browser": "~55.0.18",
         "i18next": "^25.10.10",
