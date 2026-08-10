@@ -62,7 +62,7 @@
         "@shopify/flash-list": "2.0.2",
         "@tamagui/animations-react-native": "2.0.0-rc.42",
         "@tamagui/config": "2.0.0-rc.42",
-        "@tamagui/helpers-icon": "2.0.0-rc.42",
+        "@tamagui/helpers-icon": "2.7.2",
         "@tamagui/lucide-icons-2": "2.0.0-rc.42",
         "@tamagui/sizable-context": "2.0.0-rc.42",
         "@tamagui/toast": "2.0.0-rc.42",
@@ -139,7 +139,7 @@
     "packageManager": "bun@1.3.13",
     "overrides": {
         "@tamagui/core": "2.0.0-rc.42",
-        "@tamagui/helpers-icon": "2.0.0-rc.42",
+        "@tamagui/helpers-icon": "2.7.2",
         "@tamagui/web": "2.0.0-rc.42"
     }
 }
