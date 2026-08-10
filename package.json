@@ -65,7 +65,7 @@
         "@tamagui/helpers-icon": "2.0.0-rc.42",
         "@tamagui/lucide-icons-2": "2.0.0-rc.42",
         "@tamagui/sizable-context": "2.0.0-rc.42",
-        "@tamagui/toast": "2.0.0-rc.42",
+        "@tamagui/toast": "2.7.2",
         "babel-preset-expo": "~55.0.22",
         "burnt": "^0.12.2",
         "expo": "~55.0.28",
