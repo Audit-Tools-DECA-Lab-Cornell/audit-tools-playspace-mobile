@@ -69,7 +69,7 @@
         "babel-preset-expo": "~55.0.22",
         "burnt": "^0.12.2",
         "expo": "~55.0.28",
-        "expo-background-task": "~55.0.20",
+        "expo-background-task": "~57.0.8",
         "expo-build-properties": "~55.0.16",
         "expo-constants": "~55.0.17",
         "expo-dev-client": "~55.0.37",
