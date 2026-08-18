@@ -15,7 +15,7 @@ export type PvScaleKey = (typeof PV_SCALE_KEYS)[number];
 export const SCALE_ACCENT_COLORS: Record<PvScaleKey, string> = {
     provision: "#566E3D",
     variety: "#D2691E",
-    challenge: "#B45309",
+    challenge: "#0C4767",
     sociability: "#754170",
 };
 

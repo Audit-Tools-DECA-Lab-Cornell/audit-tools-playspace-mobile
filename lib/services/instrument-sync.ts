@@ -108,6 +108,38 @@ function cacheInstrument(instrument: PlayspaceInstrument): void {
 }
 
 /**
+ * Log when the server's active instrument is older than the one this build ships.
+ *
+ * The server stays authoritative on purpose: answers are stored and scored
+ * against its definition, so rendering the newer bundled copy would produce
+ * submissions the backend rejects. But an older server instrument silently
+ * drops whatever the newer one added - a scale the build expects to declare
+ * `selection_mode: "multiple"` simply arrives without it and falls back to
+ * single-select, with nothing in the UI to say why. Surfacing the skew is what
+ * separates "the deployment is behind" from "the feature is broken".
+ *
+ * @param fetched Instrument payload just returned by the backend.
+ */
+function warnWhenServerInstrumentIsBehindBundle(fetched: PlayspaceInstrument): void {
+    const bundled = getBundledInstrument();
+    if (bundled === null) {
+        return;
+    }
+
+    if (compareInstrumentVersions(fetched.instrument_version, bundled.instrument_version) >= 0) {
+        return;
+    }
+
+    log.withMetadata({
+        serverInstrumentVersion: fetched.instrument_version,
+        bundledInstrumentVersion: bundled.instrument_version,
+    }).warn(
+        "server instrument is older than the bundled instrument; rendering the server version, " +
+            "so features added after the server's version stay inactive",
+    );
+}
+
+/**
  * Synchronize the instrument definition.
  *
  * When online, fetches the latest active instrument from the backend and
@@ -128,6 +160,7 @@ export async function syncInstrument(
     if (isOnline) {
         const fetched = await fetchInstrumentFromApi(instrumentKey, lang);
         if (fetched !== null) {
+            warnWhenServerInstrumentIsBehindBundle(fetched);
             cacheInstrument(fetched);
             log.info("instrument synced from API");
             return fetched;
