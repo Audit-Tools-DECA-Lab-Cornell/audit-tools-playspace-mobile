@@ -100,7 +100,7 @@ without it the login screen shows "Authentication failed" (on-screen dev hint:
 production** by starting Metro with the base URL overridden:
 
 ```bash
-EXPO_PUBLIC_API_BASE_URL="https://audit-tools-backend.onrender.com" bunx expo start
+EXPO_PUBLIC_API_BASE_URL="https://audit-tools-backend-zyde.onrender.com" bunx expo start
 ```
 
 (One shared backend serves both products; Playspace clients use its `/playspace/*`

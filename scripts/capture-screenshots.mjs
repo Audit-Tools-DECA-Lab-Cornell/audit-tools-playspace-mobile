@@ -8,7 +8,7 @@ import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
 const DEFAULT_SCHEME = "copa-mobile";
-const DEFAULT_API_BASE_URL = "https://audit-tools-backend.onrender.com";
+const DEFAULT_API_BASE_URL = "https://audit-tools-backend-zyde.onrender.com";
 const DEFAULT_WAIT_MS = 20000;
 const DEFAULT_LOGIN_WAIT_MS = 20000;
 const DEFAULT_SCROLL_DELAY_MS = 450;
