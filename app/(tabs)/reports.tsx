@@ -13,6 +13,9 @@ import { ScoreLegendInfo } from "components/reports/score-legend-info";
 import { useRouter, type Href } from "expo-router";
 import type { AuditExportFormat, AuditExportPreview, ExportAuditorProfile } from "lib/exports/reports";
 import { buildAuditExportPreview, shareBulkAuditExport } from "lib/exports/reports";
+import { buildBulkReportIdentity } from "lib/audit/report-filter-keys";
+import { useReportFilter } from "lib/audit/use-report-filter";
+import { BulkFilterSheet, ReportFilterBanner } from "components/reports/ReportFilterControls";
 import { buildExportableAuditForPlace, loadOptionalExportAuditorProfile } from "lib/exports/reports/helpers";
 import { getProjectPlaceKey } from "lib/audit/pair-key";
 import {
@@ -66,6 +69,9 @@ export default function ReportsScreen() {
     const instrument = useLocalizedInstrument();
     const toast = useToastController();
     const session = useAuthStore((state) => state.session);
+    // One selection applied to every report this screen exports, remembered
+    // per auditor so a repeat export does not need re-picking.
+    const bulkFilter = useReportFilter(buildBulkReportIdentity(), session?.user.id ?? null);
     const places = useLocalFirstPlaces();
     const loadPlaces = usePlacesStore((state) => state.loadPlaces);
     const sessionsByAuditId = usePlayspaceAuditStore((state) => state.sessionsByAuditId);
@@ -267,7 +273,9 @@ export default function ReportsScreen() {
                     setPreviewData(null);
                     return;
                 }
-                setPreviewData(buildAuditExportPreview(exportableAudit, previewInstrument));
+                setPreviewData(
+                    buildAuditExportPreview({ ...exportableAudit, resultFilter: bulkFilter.filter }, previewInstrument),
+                );
             })
             .catch(() => {
                 if (isCancelled) {
@@ -285,7 +293,7 @@ export default function ReportsScreen() {
         return () => {
             isCancelled = true;
         };
-    }, [buildExportableAudit, instrument, previewPlace]);
+    }, [buildExportableAudit, bulkFilter.filter, instrument, previewPlace]);
 
     const showExportSuccess = useCallback(
         (fileName: string) => {
@@ -317,9 +325,9 @@ export default function ReportsScreen() {
             setActiveExportKey(exportKey);
             try {
                 const auditorProfile = await loadOptionalExportAuditorProfile(session);
-                const exportableAudits = await Promise.all(
-                    exportablePlaces.map((place) => buildExportableAudit(place, auditorProfile)),
-                );
+                const exportableAudits = (
+                    await Promise.all(exportablePlaces.map((place) => buildExportableAudit(place, auditorProfile)))
+                ).map((exportableAudit) => ({ ...exportableAudit, resultFilter: bulkFilter.filter }));
                 const fileName = await shareBulkAuditExport(
                     exportableAudits,
                     auditorProfile,
@@ -334,7 +342,16 @@ export default function ReportsScreen() {
                 setActiveExportKey((currentValue) => (currentValue === exportKey ? null : currentValue));
             }
         },
-        [buildExportableAudit, exportablePlaces, instrument, session, showExportError, showExportSuccess, ds.colors],
+        [
+            buildExportableAudit,
+            exportablePlaces,
+            instrument,
+            session,
+            showExportError,
+            showExportSuccess,
+            ds.colors,
+            bulkFilter.filter,
+        ],
     );
 
     const hasActiveFilters =
@@ -713,6 +730,16 @@ export default function ReportsScreen() {
                         >
                             {t("bulkExportTitle", { ns: "reports" })}
                         </Text>
+                        <ReportFilterBanner
+                            filter={bulkFilter.filter}
+                            onShowFullReport={bulkFilter.showFullReport}
+                            testIDPrefix="report-filter-bulk"
+                        />
+                        <BulkFilterSheet
+                            filter={bulkFilter.filter}
+                            onOverallChange={bulkFilter.setOverall}
+                            onReset={bulkFilter.reset}
+                        />
                         <XStack gap="$2">
                             <ActionButton
                                 variant="default"

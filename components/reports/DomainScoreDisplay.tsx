@@ -3,6 +3,7 @@ import { ScrollView } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 import { useTranslation } from "react-i18next";
 import type { AuditScoreTotals } from "lib/audit/types";
+import type { ConstructSelection } from "lib/audit/report-filter";
 import { formatPercentage, formatScoreValue, roundedPercentOfMax } from "lib/audit/score-helpers";
 import { useDesignSystem } from "lib/design-system";
 import { useResponsiveLayout } from "lib/responsive-layout";
@@ -14,6 +15,7 @@ import { type TFunction } from "i18next";
 export interface DomainScoreDisplayProps {
     readonly scoreTotals: AuditScoreTotals | null;
     readonly itemCount: number;
+    readonly constructSelection?: ConstructSelection;
 }
 
 // ── Metric definitions ───────────────────────────────────────────────────────
@@ -371,6 +373,7 @@ function BarBlock({
 export const DomainScoreDisplay = memo(function DomainScoreDisplay({
     scoreTotals,
     itemCount,
+    constructSelection = { playValue: true, usability: true },
 }: DomainScoreDisplayProps) {
     const ds = useDesignSystem();
     const layout = useResponsiveLayout();
@@ -382,12 +385,15 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
     const barWidth = layout.isTablet ? 50 : 38;
 
     const sociabilityMetrics = resolveSociabilityMetrics(scoreTotals);
+    const constructMetrics = CONSTRUCT_METRICS.filter((metric) =>
+        metric.key === "play_value" ? constructSelection.playValue : constructSelection.usability,
+    );
     // Keeps the Sociability group the same width whether it shows three opportunities or the single
     // legacy aggregate, so a `5.31` report has no stranded narrow column.
     const sociabilityDataColWidth = getSociabilityDataColumnWidth(tableLayout, sociabilityMetrics.length);
 
     const getColWidth = (metric: MetricConfig): number => {
-        if (CONSTRUCT_METRICS.some((construct) => construct.key === metric.key)) {
+        if (constructMetrics.some((construct) => construct.key === metric.key)) {
             return tableLayout.rightDataColWidth;
         }
         return sociabilityMetrics.some((sociability) => sociability.key === metric.key)
@@ -404,23 +410,29 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
             <YStack gap="$3" width="100%">
                 <ScrollView horizontal showsHorizontalScrollIndicator>
                     <XStack gap="$4" items="flex-end">
-                        {[SCALE_METRICS, sociabilityMetrics, CONSTRUCT_METRICS].map((metrics, groupIndex) => (
-                            <BarBlock
-                                key={metrics[0]?.key ?? `group-${groupIndex.toString()}`}
-                                metrics={metrics}
-                                scoreTotals={scoreTotals}
-                                getColWidth={getColWidth}
-                                barWidth={barWidth}
-                                trackHeight={trackHeight}
-                                labelColWidth={tableLayout.labelColWidth}
-                                ds={ds}
-                                t={t}
-                            />
-                        ))}
+                        {[SCALE_METRICS, sociabilityMetrics, constructMetrics]
+                            .filter((metrics) => metrics.length > 0)
+                            .map((metrics, groupIndex) => (
+                                <BarBlock
+                                    key={metrics[0]?.key ?? `group-${groupIndex.toString()}`}
+                                    metrics={metrics}
+                                    scoreTotals={scoreTotals}
+                                    getColWidth={getColWidth}
+                                    barWidth={barWidth}
+                                    trackHeight={trackHeight}
+                                    labelColWidth={tableLayout.labelColWidth}
+                                    ds={ds}
+                                    t={t}
+                                />
+                            ))}
                     </XStack>
                 </ScrollView>
 
-                <DomainScoreTable scoreTotals={scoreTotals} itemCount={itemCount} />
+                <DomainScoreTable
+                    scoreTotals={scoreTotals}
+                    itemCount={itemCount}
+                    constructSelection={constructSelection}
+                />
             </YStack>
         );
     }
@@ -438,7 +450,7 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
 
     const scaleGroupWidth = phoneLabelColWidth + phoneLeftDataColWidth * SCALE_METRICS.length;
     const sociabilityGroupWidth = tableLayout.sociabilityTableWidth;
-    const constructGroupWidth = phoneLabelColWidth + phoneRightDataColWidth * CONSTRUCT_METRICS.length;
+    const constructGroupWidth = phoneLabelColWidth + phoneRightDataColWidth * constructMetrics.length;
 
     const renderPhoneSection = (
         metrics: readonly MetricConfig[],
@@ -484,6 +496,7 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
                         dataColWidth={dataColWidth}
                         ds={ds}
                         t={t}
+                        constructSelection={constructSelection}
                     />
                 </YStack>
             </ScrollView>
@@ -520,13 +533,15 @@ export const DomainScoreDisplay = memo(function DomainScoreDisplay({
                     ? t("domain.sociabilityBreakdownNotCaptured", { ns: "reports" })
                     : undefined,
             )}
-            {renderPhoneSection(
-                CONSTRUCT_METRICS,
-                constructGroupWidth,
-                phoneRightDataColWidth,
-                "domain.barRowPlayValueUsability",
-                "construct",
-            )}
+            {constructMetrics.length === 0
+                ? null
+                : renderPhoneSection(
+                      constructMetrics,
+                      constructGroupWidth,
+                      phoneRightDataColWidth,
+                      "domain.barRowPlayValueUsability",
+                      "construct",
+                  )}
         </YStack>
     );
 });
@@ -544,6 +559,7 @@ interface PhoneSubTableProps {
     readonly dataColWidth: number;
     readonly ds: ReturnType<typeof useDesignSystem>;
     readonly t: TFunction<"reports", undefined>;
+    readonly constructSelection: ConstructSelection;
 }
 
 interface ColDef {
@@ -621,12 +637,18 @@ const CONSTRUCT_COLDEFS: readonly ColDef[] = [
 
 /** Choose the columns for one phone group, falling back to the Sociability aggregate when the
  * source instrument never captured the three opportunities. */
-function resolvePhoneColumns(group: PhoneSubTableGroup, scoreTotals: AuditScoreTotals | null): readonly ColDef[] {
+function resolvePhoneColumns(
+    group: PhoneSubTableGroup,
+    scoreTotals: AuditScoreTotals | null,
+    constructSelection: ConstructSelection,
+): readonly ColDef[] {
     if (group === "scale") {
         return SCALE_COLDEFS;
     }
     if (group === "construct") {
-        return CONSTRUCT_COLDEFS;
+        return CONSTRUCT_COLDEFS.filter((column) =>
+            column.key === "play_value" ? constructSelection.playValue : constructSelection.usability,
+        );
     }
     return scoreTotals?.sociability_breakdown != null ? SOCIABILITY_DIMENSION_COLDEFS : SOCIABILITY_TOTAL_COLDEFS;
 }
@@ -655,8 +677,9 @@ function PhoneSubTable({
     dataColWidth,
     ds,
     t,
+    constructSelection,
 }: PhoneSubTableProps) {
-    const columns = resolvePhoneColumns(group, scoreTotals);
+    const columns = resolvePhoneColumns(group, scoreTotals, constructSelection);
 
     const rows = [
         {

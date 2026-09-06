@@ -88,6 +88,8 @@ describe("Sociability report data", () => {
                 scoreTotals: multipleTotals,
                 itemCount: 1,
                 sectionNotes: [],
+                commentOnlyNotes: [],
+                filteredOutQuestionCount: 0,
                 questions: [],
             },
             {
@@ -96,6 +98,8 @@ describe("Sociability report data", () => {
                 scoreTotals: legacyTotals,
                 itemCount: 1,
                 sectionNotes: [],
+                commentOnlyNotes: [],
+                filteredOutQuestionCount: 0,
                 questions: [],
             },
         ];

@@ -21,3 +21,94 @@ appId: com.pratyush.sudhakar.audittoolsplayspacemobile
 - assertVisible: ".*How large is the playspace.*"
 - assertVisible: ".*0-5 years.*"
 - assertVisible: ".*Current weather conditions.*"
+
+- scrollUntilVisible:
+      element:
+          id: "report-filter-overall-play-value"
+      direction: DOWN
+      timeout: 20000
+- assertVisible:
+      id: "report-filter-overall-usability"
+- assertVisible:
+      id: "report-filter-reset"
+- assertNotVisible:
+      id: "report-filter-banner"
+
+- tapOn:
+      id: "report-filter-overall-usability"
+- assertVisible: "Showing Play Value results only."
+- assertVisible:
+      id: "report-filter-show-full"
+- back
+- extendedWaitUntil:
+      visible: ".*Reports.*|.*Riverside.*"
+      timeout: 15000
+- tapOn:
+      text: ".*Riverside.*"
+- scrollUntilVisible:
+      element:
+          id: "report-filter-banner"
+      direction: DOWN
+      timeout: 20000
+- assertVisible: "Showing Play Value results only."
+
+- tapOn:
+      id: "report-filter-show-full"
+- assertNotVisible:
+      id: "report-filter-banner"
+- back
+- extendedWaitUntil:
+      visible: ".*Reports.*|.*Riverside.*"
+      timeout: 15000
+- tapOn:
+      text: ".*Riverside.*"
+- scrollUntilVisible:
+      element:
+          id: "report-filter-banner"
+      direction: DOWN
+      timeout: 20000
+- assertVisible: "Showing Play Value results only."
+
+- tapOn:
+      id: "report-filter-reset"
+- assertNotVisible:
+      id: "report-filter-banner"
+- back
+- extendedWaitUntil:
+      visible: ".*Reports.*|.*Riverside.*"
+      timeout: 15000
+- tapOn:
+      text: ".*Riverside.*"
+- scrollUntilVisible:
+      element:
+          id: "report-filter-overall-play-value"
+      direction: DOWN
+      timeout: 20000
+- assertNotVisible:
+      id: "report-filter-banner"
+
+- tapOn:
+      id: "report-filter-overall-play-value"
+- assertVisible: "Showing Usability results only."
+- tapOn:
+      id: "report-filter-reset"
+- scrollUntilVisible:
+      element:
+          text: "Expand all"
+      direction: DOWN
+      timeout: 20000
+- tapOn: "Expand all"
+- scrollUntilVisible:
+      element:
+          id: "report-filter-domain-open_space-usability"
+      direction: DOWN
+      timeout: 20000
+- tapOn:
+      id: "report-filter-domain-open_space-usability"
+- assertVisible: "Showing results with some domains customized."
+- assertVisible:
+      id: "report-filter-domain-open_space-use-report-setting"
+- tapOn:
+      id: "report-filter-domain-open_space-use-report-setting"
+- assertNotVisible:
+      id: "report-filter-banner"

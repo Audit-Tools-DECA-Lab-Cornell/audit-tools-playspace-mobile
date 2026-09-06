@@ -3,6 +3,7 @@ import { ScrollView, type LayoutChangeEvent, type NativeScrollEvent, type Native
 import { Text, XStack, YStack } from "tamagui";
 import { useTranslation } from "react-i18next";
 import type { DomainQuestionRow } from "lib/audit/report-helpers";
+import type { ConstructSelection } from "lib/audit/report-filter";
 import { SOCIABILITY_CATEGORY_KEYS } from "lib/audit/sociability";
 import { formatQuestionKeyForDisplay } from "lib/audit/prompt-segments";
 import { formatScoreValue } from "lib/audit/score-helpers";
@@ -12,6 +13,7 @@ import { PromptRichText } from "components/reports/PromptRichText";
 
 export interface DomainItemsTableProps {
     readonly questions: DomainQuestionRow[];
+    readonly constructSelection?: ConstructSelection;
 }
 
 const SOCIABILITY_CATEGORY_LABEL_KEYS: Record<(typeof SOCIABILITY_CATEGORY_KEYS)[number], string> = {
@@ -62,12 +64,16 @@ interface ItemsTableLayout {
     readonly minTableWidth: number;
 }
 
-function computeItemsTableLayout(isTablet: boolean, isWideTablet: boolean): ItemsTableLayout {
+function computeItemsTableLayout(
+    isTablet: boolean,
+    isWideTablet: boolean,
+    constructColumnCount: number,
+): ItemsTableLayout {
     const idColWidth = isTablet ? 92 : 80;
     const itemColWidth = isWideTablet ? 520 : isTablet ? 460 : 400;
     const scaleColWidth = isTablet ? 130 : 112;
     const pvuColWidth = isTablet ? 152 : 132;
-    const minTableWidth = idColWidth + itemColWidth + scaleColWidth * 4 + pvuColWidth * 2;
+    const minTableWidth = idColWidth + itemColWidth + scaleColWidth * 4 + pvuColWidth * constructColumnCount;
     return { idColWidth, itemColWidth, scaleColWidth, pvuColWidth, minTableWidth };
 }
 
@@ -75,14 +81,22 @@ function computeItemsTableLayout(isTablet: boolean, isWideTablet: boolean): Item
  * Per-question breakdown table for the extended report view.
  * Column widths adapt to the viewport tier.
  */
-export const DomainItemsTable = memo(function DomainItemsTable({ questions }: DomainItemsTableProps) {
+export const DomainItemsTable = memo(function DomainItemsTable({
+    questions,
+    constructSelection = { playValue: true, usability: true },
+}: DomainItemsTableProps) {
     const ds = useDesignSystem();
     const layout = useResponsiveLayout();
     const { t } = useTranslation("reports");
 
     const cols = useMemo(
-        () => computeItemsTableLayout(layout.isTablet, layout.isWideTablet),
-        [layout.isTablet, layout.isWideTablet],
+        () =>
+            computeItemsTableLayout(
+                layout.isTablet,
+                layout.isWideTablet,
+                Number(constructSelection.playValue) + Number(constructSelection.usability),
+            ),
+        [constructSelection.playValue, constructSelection.usability, layout.isTablet, layout.isWideTablet],
     );
 
     // Edge-fade affordance: the table is ~1436px wide, so on every device some
@@ -304,20 +318,24 @@ export const DomainItemsTable = memo(function DomainItemsTable({ questions }: Do
                                     {formatQuestionKeyForDisplay(question.questionKey)}
                                 </Text>
                                 <XStack gap="$3">
-                                    <Text
-                                        color={ds.colors.foreground}
-                                        fontFamily={ds.fonts.bodyBold}
-                                        fontSize={cellFont}
-                                    >
-                                        {`${t("extendedTable.columnPlayValue")}: ${formatPvuCompact(question.playValueScore, question.playValueMax)}`}
-                                    </Text>
-                                    <Text
-                                        color={ds.colors.foreground}
-                                        fontFamily={ds.fonts.bodyBold}
-                                        fontSize={cellFont}
-                                    >
-                                        {`${t("extendedTable.columnUsability")}: ${formatPvuCompact(question.usabilityScore, question.usabilityMax)}`}
-                                    </Text>
+                                    {constructSelection.playValue ? (
+                                        <Text
+                                            color={ds.colors.foreground}
+                                            fontFamily={ds.fonts.bodyBold}
+                                            fontSize={cellFont}
+                                        >
+                                            {`${t("extendedTable.columnPlayValue")}: ${formatPvuCompact(question.playValueScore, question.playValueMax)}`}
+                                        </Text>
+                                    ) : null}
+                                    {constructSelection.usability ? (
+                                        <Text
+                                            color={ds.colors.foreground}
+                                            fontFamily={ds.fonts.bodyBold}
+                                            fontSize={cellFont}
+                                        >
+                                            {`${t("extendedTable.columnUsability")}: ${formatPvuCompact(question.usabilityScore, question.usabilityMax)}`}
+                                        </Text>
+                                    ) : null}
                                 </XStack>
                             </XStack>
 
@@ -425,12 +443,16 @@ export const DomainItemsTable = memo(function DomainItemsTable({ questions }: Do
                         <HeaderCell width={cols.scaleColWidth}>
                             {t("extendedTable.columnSociability", { ns: "reports" })}
                         </HeaderCell>
-                        <HeaderCell width={cols.pvuColWidth}>
-                            {t("extendedTable.columnPlayValue", { ns: "reports" })}
-                        </HeaderCell>
-                        <HeaderCell width={cols.pvuColWidth}>
-                            {t("extendedTable.columnUsability", { ns: "reports" })}
-                        </HeaderCell>
+                        {constructSelection.playValue ? (
+                            <HeaderCell width={cols.pvuColWidth}>
+                                {t("extendedTable.columnPlayValue", { ns: "reports" })}
+                            </HeaderCell>
+                        ) : null}
+                        {constructSelection.usability ? (
+                            <HeaderCell width={cols.pvuColWidth}>
+                                {t("extendedTable.columnUsability", { ns: "reports" })}
+                            </HeaderCell>
+                        ) : null}
                     </XStack>
 
                     {/* Data rows */}
@@ -561,26 +583,30 @@ export const DomainItemsTable = memo(function DomainItemsTable({ questions }: Do
                                 </CellWrapper>
 
                                 {/* Play value */}
-                                <CellWrapper width={cols.pvuColWidth} align="flex-start">
-                                    <DataText textAlign="left">
-                                        {formatPlayUsabilityCell(
-                                            question.playValueScore,
-                                            question.playValueMax,
-                                            translatePv,
-                                        )}
-                                    </DataText>
-                                </CellWrapper>
+                                {constructSelection.playValue ? (
+                                    <CellWrapper width={cols.pvuColWidth} align="flex-start">
+                                        <DataText textAlign="left">
+                                            {formatPlayUsabilityCell(
+                                                question.playValueScore,
+                                                question.playValueMax,
+                                                translatePv,
+                                            )}
+                                        </DataText>
+                                    </CellWrapper>
+                                ) : null}
 
                                 {/* Usability */}
-                                <CellWrapper width={cols.pvuColWidth} align="flex-start">
-                                    <DataText textAlign="left">
-                                        {formatPlayUsabilityCell(
-                                            question.usabilityScore,
-                                            question.usabilityMax,
-                                            translatePv,
-                                        )}
-                                    </DataText>
-                                </CellWrapper>
+                                {constructSelection.usability ? (
+                                    <CellWrapper width={cols.pvuColWidth} align="flex-start">
+                                        <DataText textAlign="left">
+                                            {formatPlayUsabilityCell(
+                                                question.usabilityScore,
+                                                question.usabilityMax,
+                                                translatePv,
+                                            )}
+                                        </DataText>
+                                    </CellWrapper>
+                                ) : null}
                             </XStack>
                         );
                     })}

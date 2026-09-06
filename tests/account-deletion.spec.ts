@@ -14,6 +14,7 @@ import {
 import { DELETION_CONFIRMATION_WORD, type AccountDeletionPreview } from "lib/account/deletion-types";
 import { auditStateStorageKey } from "lib/audit/storage-keys";
 import { submitOutboxOpKey, submitOutboxQuarantineKey } from "lib/audit/outbox/outbox-keys";
+import { reportFilterUserKey } from "lib/audit/report-filter-keys";
 
 /**
  * Account deletion is irreversible and runs on a shared field device, so the two
@@ -50,6 +51,21 @@ describe("selectAccountPurgeKeys", () => {
         const selected = selectAccountPurgeKeys(keys, ACCOUNT);
 
         expect([...selected.accountScopedKeys].sort()).toEqual([...keys].sort());
+    });
+
+    it("removes the deleted account's stored report filters", () => {
+        const selected = selectAccountPurgeKeys([reportFilterUserKey(ACCOUNT)], ACCOUNT);
+
+        expect(selected.accountScopedKeys).toEqual([reportFilterUserKey(ACCOUNT)]);
+    });
+
+    it("leaves another auditor's report filters untouched", () => {
+        const selected = selectAccountPurgeKeys(
+            [reportFilterUserKey(ACCOUNT), reportFilterUserKey(NEIGHBOUR)],
+            ACCOUNT,
+        );
+
+        expect(selected.accountScopedKeys).toEqual([reportFilterUserKey(ACCOUNT)]);
     });
 
     it("never selects a different account whose id starts with the same characters", () => {

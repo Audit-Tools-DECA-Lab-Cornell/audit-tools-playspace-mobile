@@ -1,5 +1,6 @@
 import { isAuditStateKeyForUser } from "lib/audit/storage-keys";
 import { submitOutboxUserKeyPrefix } from "lib/audit/outbox/outbox-keys";
+import { reportFilterUserKey } from "lib/audit/report-filter-keys";
 import { DELETION_CONFIRMATION_WORD, type AccountDeletionPreview } from "lib/account/deletion-types";
 
 /**
@@ -224,8 +225,9 @@ export function partitionEntriesByOwner<T extends AccountOwnedEntry>(
  */
 export function selectAccountPurgeKeys(allKeys: readonly string[], userId: string): AccountPurgeKeys {
     const outboxPrefix = submitOutboxUserKeyPrefix(userId);
+    const filterKey = reportFilterUserKey(userId);
     const accountScopedKeys = allKeys.filter(
-        (key) => isAuditStateKeyForUser(key, userId) || key.startsWith(outboxPrefix),
+        (key) => isAuditStateKeyForUser(key, userId) || key.startsWith(outboxPrefix) || key === filterKey,
     );
     const sessionCacheKeys = allKeys.filter((key) => SESSION_CACHE_KEYS.includes(key));
 

@@ -1,3 +1,5 @@
+import { buildQuestionLookup, isDefaultReportFilter, questionMatchesReportFilter } from "lib/audit/report-filter";
+import { buildReportScoreProjection, getQuestionDomainKeys } from "lib/audit/report-helpers";
 import {
     formatScoreValue,
     addScoreTotals,
@@ -100,6 +102,10 @@ function buildSociabilityBreakdownScoreRows(totals: AuditScoreTotals | null): re
 /** Build the web-styled single-audit PDF HTML used by Expo Print. */
 export function buildSingleAuditPdfHtml(exportableAudit: ExportableAudit, instrument: PlayspaceInstrument): string {
     const { auditSession, auditorProfile } = exportableAudit;
+    const projection = buildReportScoreProjection(auditSession, instrument, exportableAudit.resultFilter);
+    if (projection.isFiltered) {
+        return buildWorkbookPdfHtml(buildSingleAuditWorkbook(exportableAudit, instrument));
+    }
     const overallScores = auditSession.scores.overall;
     const detailsRows = buildAuditDetailsRows(exportableAudit, instrument);
     const spaceAuditTable = buildSingleAuditWorkbook(exportableAudit, instrument).tables.find(
@@ -346,10 +352,17 @@ function buildPdfResponseRows(exportableAudit: ExportableAudit, instrument: Play
     let questionRowIndex = 0;
     let overallTotals = createEmptyScoreTotals();
 
+    const questionLookup = buildQuestionLookup(instrument);
+    const resultFilter = exportableAudit.resultFilter;
+    const isFiltering = resultFilter !== undefined && !isDefaultReportFilter(resultFilter);
+
     for (const [sectionIndex, section] of instrument.sections.entries()) {
         const sectionResponses = auditSession.sections[section.section_key]?.responses ?? {};
-        const visibleQuestions = section.questions.filter((question) =>
-            isQuestionVisible(question, executionMode, sectionResponses),
+        const visibleQuestions = section.questions.filter(
+            (question) =>
+                isQuestionVisible(question, executionMode, sectionResponses) &&
+                (!isFiltering ||
+                    questionMatchesReportFilter(question, questionLookup, getQuestionDomainKeys, resultFilter)),
         );
         if (visibleQuestions.length === 0) continue;
 

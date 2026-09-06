@@ -3,6 +3,7 @@ import { ScrollView } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
 import { useTranslation } from "react-i18next";
 import type { AuditScoreTotals } from "lib/audit/types";
+import type { ConstructSelection } from "lib/audit/report-filter";
 import { formatScoreValue } from "lib/audit/score-helpers";
 import { useDesignSystem } from "lib/design-system";
 import { useResponsiveLayout } from "lib/responsive-layout";
@@ -11,6 +12,7 @@ import { getSociabilityDataColumnWidth, useReportScoreTableLayout } from "lib/re
 export interface DomainScoreTableProps {
     readonly scoreTotals: AuditScoreTotals | null;
     readonly itemCount: number;
+    readonly constructSelection?: ConstructSelection;
 }
 
 // ── Legacy constants (kept for any external consumers) ──
@@ -289,7 +291,11 @@ function ScoreSubTable({
  * squeeze each column past the point where the numbers stay readable. Aligns with web
  * `AlignedScoreDisplay`.
  */
-export const DomainScoreTable = memo(function DomainScoreTable({ scoreTotals, itemCount }: DomainScoreTableProps) {
+export const DomainScoreTable = memo(function DomainScoreTable({
+    scoreTotals,
+    itemCount,
+    constructSelection = { playValue: true, usability: true },
+}: DomainScoreTableProps) {
     const layout = useResponsiveLayout();
     const tableLayout = useReportScoreTableLayout();
     const { t } = useTranslation("reports");
@@ -301,6 +307,9 @@ export const DomainScoreTable = memo(function DomainScoreTable({ scoreTotals, it
     ];
 
     const sociabilityColumns = resolveSociabilityColumns(scoreTotals);
+    const constructColumns = RIGHT_COLUMNS.filter((column) =>
+        column.key === "play_value" ? constructSelection.playValue : constructSelection.usability,
+    );
     const capturesDimensions = scoreTotals?.sociability_breakdown != null;
     const sociabilityDataColWidth = getSociabilityDataColumnWidth(tableLayout, sociabilityColumns.length);
 
@@ -338,7 +347,11 @@ export const DomainScoreTable = memo(function DomainScoreTable({ scoreTotals, it
         </YStack>
     );
     const constructTable = (
-        <ScoreSubTable {...commonProps} columns={RIGHT_COLUMNS} tableWidth={tableLayout.rightTableWidth} />
+        <ScoreSubTable
+            {...commonProps}
+            columns={constructColumns}
+            tableWidth={tableLayout.labelColWidth + tableLayout.rightDataColWidth * constructColumns.length}
+        />
     );
 
     // Tablet lays the three groups out side by side in one scroller, matching the bar row above so
@@ -350,7 +363,7 @@ export const DomainScoreTable = memo(function DomainScoreTable({ scoreTotals, it
                 <XStack gap="$4" items="flex-start">
                     {scaleTable}
                     {sociabilityTable}
-                    {constructTable}
+                    {constructColumns.length === 0 ? null : constructTable}
                 </XStack>
             </ScrollView>
         );
@@ -364,9 +377,11 @@ export const DomainScoreTable = memo(function DomainScoreTable({ scoreTotals, it
             <ScrollView horizontal showsHorizontalScrollIndicator>
                 {sociabilityTable}
             </ScrollView>
-            <ScrollView horizontal showsHorizontalScrollIndicator>
-                {constructTable}
-            </ScrollView>
+            {constructColumns.length === 0 ? null : (
+                <ScrollView horizontal showsHorizontalScrollIndicator>
+                    {constructTable}
+                </ScrollView>
+            )}
         </YStack>
     );
 });

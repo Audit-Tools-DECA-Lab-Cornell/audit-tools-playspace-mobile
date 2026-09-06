@@ -12,10 +12,21 @@ import { SubmittedReportContent } from "components/reports/SubmittedReportConten
 import { StatCard } from "components/ui/stat-card";
 import { SkeletonLine } from "components/ui/skeleton";
 import {
-    buildDomainReportRows,
+    buildReportScoreProjection,
+    countIncludedUniqueScaledQuestionsWithDomains,
     countUniqueScaledQuestionsWithDomains,
     formatExecutionModeLabel,
+    normalizeDomainKey,
 } from "lib/audit/report-helpers";
+import {
+    formatPercentage,
+    formatScoreValue,
+    formatScoreWithPercentage,
+    getScoreVariantBuckets,
+    hasUnsureVariants,
+    type ScoreSummaryLabels,
+    type ScoreVariantKey,
+} from "lib/audit/score-helpers";
 import { fetchAuditSession } from "lib/audit/api";
 import { shareSingleAuditExport, type AuditExportFormat } from "lib/exports/reports";
 import {
@@ -26,17 +37,6 @@ import {
 import { buildExportableAuditForPlace, loadOptionalExportAuditorProfile } from "lib/exports/reports/helpers";
 import type { AuditorPlace } from "lib/audit/places-api";
 import { deriveLocality, derivePlaceRequirementStatus } from "lib/audit/place-helpers";
-import {
-    formatPercentage,
-    formatScorePairStacked,
-    formatScoreValue,
-    formatScoreWithPercentage,
-    getEffectiveAuditScoreTotals,
-    getScoreVariantBuckets,
-    hasUnsureVariants,
-    type ScoreSummaryLabels,
-    type ScoreVariantKey,
-} from "lib/audit/score-helpers";
 import type { AuditScoreTotals, AuditSession } from "lib/audit/types";
 import { useLocalFirstPlaces } from "lib/audit/use-local-first-places";
 import { getPlaceStatusTone, getScaleAccentColor, getScaleSoftColor, useDesignSystem } from "lib/design-system";
@@ -50,6 +50,14 @@ import {
 } from "lib/responsive-layout";
 import { useScreenshotScrollAutomation } from "lib/screenshot-automation";
 import { useAuthStore } from "stores/auth-store";
+import { createDefaultReportFilter, type ConstructSelection } from "lib/audit/report-filter";
+import { buildReportIdentity } from "lib/audit/report-filter-keys";
+import { useReportFilter } from "lib/audit/use-report-filter";
+import {
+    DomainFilterControls,
+    ReportFilterBanner,
+    ReportFilterControls,
+} from "components/reports/ReportFilterControls";
 import { usePlacesStore } from "stores/places-store";
 import { usePlayspaceAuditStore } from "stores/audit-store";
 
@@ -762,19 +770,33 @@ export default function AuditReportDetailScreen() {
 
     const isSubmitted = auditSession?.status === "SUBMITTED";
 
-    const domainRows = useMemo(() => {
+    const knownDomainKeys = useMemo(() => {
+        const buckets = selectedScoreBuckets ?? auditSession?.scores ?? null;
+        return buckets === null ? [] : Object.keys(buckets.by_domain).map((key) => normalizeDomainKey(key));
+    }, [auditSession, selectedScoreBuckets]);
+
+    const reportFilter = useReportFilter(buildReportIdentity(auditId ?? ""), session?.user.id ?? null, knownDomainKeys);
+    const filteringEnabled = instrument !== null && isSubmitted;
+    const activeFilter = filteringEnabled ? reportFilter.filter : createDefaultReportFilter();
+
+    const scoreProjection = useMemo(() => {
         if (auditSession === null || instrument === null) {
-            return [];
+            return null;
         }
-        return buildDomainReportRows(auditSession, instrument, selectedScoreBuckets ?? auditSession.scores);
-    }, [auditSession, instrument, selectedScoreBuckets]);
+        return buildReportScoreProjection(auditSession, instrument, activeFilter, selectedScoreVariant);
+    }, [auditSession, instrument, activeFilter, selectedScoreVariant]);
+    const domainRows = scoreProjection?.domainRows ?? [];
+    const domainConstructCoverage = scoreProjection?.domainCoverage ?? {};
 
     const overallItemCount = useMemo(() => {
         if (instrument === null) {
             return 0;
         }
+        if (auditSession !== null && scoreProjection?.isFiltered === true) {
+            return countIncludedUniqueScaledQuestionsWithDomains(auditSession, instrument, activeFilter);
+        }
         return countUniqueScaledQuestionsWithDomains(instrument);
-    }, [instrument]);
+    }, [activeFilter, auditSession, instrument, scoreProjection?.isFiltered]);
 
     const playspaceContextRows = useMemo(() => {
         if (auditSession === null || instrument === null) {
@@ -841,7 +863,12 @@ export default function AuditReportDetailScreen() {
                     exportAuditMissingMessage: t("exportAuditMissing", { ns: "reports" }),
                     auditorProfile,
                 });
-                await shareSingleAuditExport(exportableAudit, instrument!, format, ds.colors);
+                await shareSingleAuditExport(
+                    { ...exportableAudit, resultFilter: activeFilter },
+                    instrument!,
+                    format,
+                    ds.colors,
+                );
                 const placeAbbreviatedName = place.place_name
                     .split(" ")
                     .map((word) => word[0])
@@ -862,7 +889,7 @@ export default function AuditReportDetailScreen() {
                 setActiveExportKey((currentValue) => (currentValue === exportKey ? null : currentValue));
             }
         },
-        [cachedAudit, instrument, place, session, showExportError, showExportSuccess, t, ds.colors],
+        [cachedAudit, instrument, place, session, showExportError, showExportSuccess, t, ds.colors, activeFilter],
     );
 
     const scrollReportDetailToOffset = useCallback((offset: number) => {
@@ -1013,6 +1040,23 @@ export default function AuditReportDetailScreen() {
                                 </SurfaceCard>
                             )}
 
+                            {filteringEnabled ? (
+                                <SurfaceCard>
+                                    <YStack gap="$3">
+                                        <ReportFilterBanner
+                                            filter={activeFilter}
+                                            onShowFullReport={reportFilter.showFullReport}
+                                        />
+                                        <ReportFilterControls
+                                            filter={activeFilter}
+                                            onOverallChange={reportFilter.setOverall}
+                                            onApplyToAllDomains={reportFilter.applyToAllDomains}
+                                            onReset={reportFilter.reset}
+                                        />
+                                    </YStack>
+                                </SurfaceCard>
+                            ) : null}
+
                             {place === undefined ? null : (
                                 <SurfaceCard>
                                     <XStack items="center" gap="$2">
@@ -1057,22 +1101,48 @@ export default function AuditReportDetailScreen() {
                                 </SurfaceCard>
                             )}
 
-                            <AuditMetrics auditSession={auditSession} />
-                            {isSubmitted && hasUnsureVariants(auditSession.scores) ? (
+                            <AuditMetrics
+                                overall={scoreProjection?.overall ?? null}
+                                constructSelection={
+                                    scoreProjection?.visibleConstructs ?? { playValue: true, usability: true }
+                                }
+                            />
+                            {isSubmitted &&
+                            hasUnsureVariants(auditSession.scores) &&
+                            (scoreProjection?.unsureAnswerCount ?? auditSession.scores.unsure_answer_count) > 0 ? (
                                 <ScoreVariantSelector
                                     selectedVariant={selectedScoreVariant}
-                                    unsureAnswerCount={auditSession.scores.unsure_answer_count}
+                                    unsureAnswerCount={
+                                        scoreProjection?.unsureAnswerCount ?? auditSession.scores.unsure_answer_count
+                                    }
                                     onSelectVariant={setSelectedScoreVariant}
                                 />
                             ) : null}
                             {isSubmitted ? (
                                 <SubmittedReportContent
                                     domainRows={domainRows}
-                                    overallScores={getEffectiveAuditScoreTotals(
-                                        auditSession.scores,
-                                        selectedScoreVariant,
-                                    )}
+                                    overallScores={scoreProjection?.overall ?? null}
                                     overallItemCount={overallItemCount}
+                                    resultFilter={activeFilter}
+                                    overallConstructSelection={
+                                        scoreProjection?.visibleConstructs ?? { playValue: true, usability: true }
+                                    }
+                                    domainCoverage={domainConstructCoverage}
+                                    renderDomainFilter={(domainKey, domainTitle) => (
+                                        <DomainFilterControls
+                                            domainKey={domainKey}
+                                            domainTitle={domainTitle}
+                                            selection={activeFilter.domainOverrides[domainKey] ?? activeFilter.overall}
+                                            coverage={domainConstructCoverage[domainKey]}
+                                            hasOverride={domainKey in activeFilter.domainOverrides}
+                                            onChange={(selection) => {
+                                                reportFilter.setDomain(domainKey, selection);
+                                            }}
+                                            onUseReportSetting={() => {
+                                                reportFilter.clearDomain(domainKey);
+                                            }}
+                                        />
+                                    )}
                                 />
                             ) : (
                                 <YStack gap="$2">
@@ -1223,7 +1293,8 @@ function formatMetricMaxHelper(maximum: number | null): string | undefined {
 }
 
 interface AuditMetricsProps {
-    readonly auditSession: AuditSession;
+    readonly overall: AuditScoreTotals | null;
+    readonly constructSelection: ConstructSelection;
 }
 
 /**
@@ -1232,21 +1303,26 @@ interface AuditMetricsProps {
  * @param props Loaded audit session.
  * @returns Summary metric card grid.
  */
-function AuditMetrics({ auditSession }: Readonly<AuditMetricsProps>) {
+function AuditMetrics({ overall, constructSelection }: Readonly<AuditMetricsProps>) {
     const ds = useDesignSystem();
     const layout = useResponsiveLayout();
     const { t } = useTranslation("reports");
-    const overall = getEffectiveAuditScoreTotals(auditSession.scores);
     const overallMaximum =
         overall === null ? null : { pv: overall.play_value_total_max, u: overall.usability_total_max };
     const pendingMetricText = t("detail.pendingMetric", { ns: "reports" });
     const overallMetricValue =
         overall === null || overallMaximum === null
             ? pendingMetricText
-            : (formatScorePairStacked({
-                  pv: overall.play_value_total,
-                  u: overall.usability_total,
-              }) ?? pendingMetricText);
+            : [
+                  constructSelection.playValue
+                      ? `${t("playValueShort", { ns: "reports" })} ${formatScoreValue(overall.play_value_total)}`
+                      : null,
+                  constructSelection.usability
+                      ? `${t("usabilityShort", { ns: "reports" })} ${formatScoreValue(overall.usability_total)}`
+                      : null,
+              ]
+                  .filter((value): value is string => value !== null)
+                  .join("\n") || pendingMetricText;
     const playValueMetricValue =
         overall === null
             ? pendingMetricText
@@ -1263,7 +1339,16 @@ function AuditMetrics({ auditSession }: Readonly<AuditMetricsProps>) {
     const overallHelperText =
         overall === null || overallMaximum === null
             ? undefined
-            : `${t("detail.overallScoreHint", { ns: "reports" })}\n${formatScorePairStacked(overallMaximum)}`;
+            : `${t("detail.overallScoreHint", { ns: "reports" })}\n${[
+                  constructSelection.playValue
+                      ? `${t("playValueShort", { ns: "reports" })} ${formatScoreValue(overallMaximum.pv)}`
+                      : null,
+                  constructSelection.usability
+                      ? `${t("usabilityShort", { ns: "reports" })} ${formatScoreValue(overallMaximum.u)}`
+                      : null,
+              ]
+                  .filter((value): value is string => value !== null)
+                  .join("\n")}`;
     const summaryCardMinHeight = layout.isTablet
         ? Math.max(140, layout.summaryCardMinHeight - 18)
         : layout.summaryCardMinHeight;
@@ -1283,22 +1368,30 @@ function AuditMetrics({ auditSession }: Readonly<AuditMetricsProps>) {
                         minHeight={summaryCardMinHeight}
                         dense={layout.isTablet}
                     />
-                    <StatCard
-                        label={t("detail.playValueCardLabel", { ns: "reports" })}
-                        value={playValueMetricValue}
-                        accentColor={ds.colors.primary}
-                        helperText={overall === null ? undefined : formatMetricMaxHelper(overall.play_value_total_max)}
-                        minHeight={summaryCardMinHeight}
-                        dense={layout.isTablet}
-                    />
-                    <StatCard
-                        label={t("detail.usabilityCardLabel", { ns: "reports" })}
-                        value={usabilityMetricValue}
-                        accentColor={ds.colors.primary}
-                        helperText={overall === null ? undefined : formatMetricMaxHelper(overall.usability_total_max)}
-                        minHeight={summaryCardMinHeight}
-                        dense={layout.isTablet}
-                    />
+                    {constructSelection.playValue ? (
+                        <StatCard
+                            label={t("detail.playValueCardLabel", { ns: "reports" })}
+                            value={playValueMetricValue}
+                            accentColor={ds.colors.primary}
+                            helperText={
+                                overall === null ? undefined : formatMetricMaxHelper(overall.play_value_total_max)
+                            }
+                            minHeight={summaryCardMinHeight}
+                            dense={layout.isTablet}
+                        />
+                    ) : null}
+                    {constructSelection.usability ? (
+                        <StatCard
+                            label={t("detail.usabilityCardLabel", { ns: "reports" })}
+                            value={usabilityMetricValue}
+                            accentColor={ds.colors.primary}
+                            helperText={
+                                overall === null ? undefined : formatMetricMaxHelper(overall.usability_total_max)
+                            }
+                            minHeight={summaryCardMinHeight}
+                            dense={layout.isTablet}
+                        />
+                    ) : null}
                     <StatCard
                         label={t("detail.sociabilityCardLabel", { ns: "reports" })}
                         value={sociabilityMetricValue}
@@ -1319,28 +1412,32 @@ function AuditMetrics({ auditSession }: Readonly<AuditMetricsProps>) {
                             minHeight={layout.summaryCardMinHeight}
                             dense={layout.isTablet}
                         />
-                        <StatCard
-                            label={t("detail.playValueCardLabel", { ns: "reports" })}
-                            value={playValueMetricValue}
-                            accentColor={ds.colors.primary}
-                            helperText={
-                                overall === null ? undefined : formatMetricMaxHelper(overall.play_value_total_max)
-                            }
-                            minHeight={layout.summaryCardMinHeight}
-                            dense={layout.isTablet}
-                        />
+                        {constructSelection.playValue ? (
+                            <StatCard
+                                label={t("detail.playValueCardLabel", { ns: "reports" })}
+                                value={playValueMetricValue}
+                                accentColor={ds.colors.primary}
+                                helperText={
+                                    overall === null ? undefined : formatMetricMaxHelper(overall.play_value_total_max)
+                                }
+                                minHeight={layout.summaryCardMinHeight}
+                                dense={layout.isTablet}
+                            />
+                        ) : null}
                     </XStack>
                     <XStack gap="$3">
-                        <StatCard
-                            label={t("detail.usabilityCardLabel", { ns: "reports" })}
-                            value={usabilityMetricValue}
-                            accentColor={ds.colors.primary}
-                            helperText={
-                                overall === null ? undefined : formatMetricMaxHelper(overall.usability_total_max)
-                            }
-                            minHeight={layout.summaryCardMinHeight}
-                            dense={layout.isTablet}
-                        />
+                        {constructSelection.usability ? (
+                            <StatCard
+                                label={t("detail.usabilityCardLabel", { ns: "reports" })}
+                                value={usabilityMetricValue}
+                                accentColor={ds.colors.primary}
+                                helperText={
+                                    overall === null ? undefined : formatMetricMaxHelper(overall.usability_total_max)
+                                }
+                                minHeight={layout.summaryCardMinHeight}
+                                dense={layout.isTablet}
+                            />
+                        ) : null}
                         <StatCard
                             label={t("detail.sociabilityCardLabel", { ns: "reports" })}
                             value={sociabilityMetricValue}

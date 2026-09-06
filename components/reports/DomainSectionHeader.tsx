@@ -5,6 +5,7 @@ import { ChevronDown } from "@tamagui/lucide-icons-2";
 import { useTranslation } from "react-i18next";
 import { useDesignSystem } from "lib/design-system";
 import { formatPercentage } from "lib/audit/score-helpers";
+import type { ConstructSelection } from "lib/audit/report-filter";
 import type { AuditScoreTotals } from "lib/audit/types";
 
 interface DomainSectionHeaderProps {
@@ -12,6 +13,7 @@ interface DomainSectionHeaderProps {
     readonly isExpanded: boolean;
     readonly onToggle: () => void;
     readonly scoreTotals?: AuditScoreTotals | null;
+    readonly constructSelection?: ConstructSelection;
     readonly accessibilityLabel?: string;
 }
 
@@ -24,6 +26,7 @@ export const DomainSectionHeader = memo(function DomainSectionHeader({
     isExpanded,
     onToggle,
     scoreTotals,
+    constructSelection = { playValue: true, usability: true },
     accessibilityLabel,
 }: DomainSectionHeaderProps) {
     const ds = useDesignSystem();
@@ -36,10 +39,11 @@ export const DomainSectionHeader = memo(function DomainSectionHeader({
             : null;
     const uPct =
         st !== null && st.usability_total_max > 0 ? formatPercentage(st.usability_total, st.usability_total_max) : null;
-    const dualPctText =
-        pvPct !== null && uPct !== null && pvPct !== "--" && uPct !== "--"
-            ? `${t("playValueShort")} ${pvPct} · ${t("usabilityShort")} ${uPct}`
-            : null;
+    const scoreParts = [
+        constructSelection.playValue && pvPct !== null && pvPct !== "--" ? `${t("playValueShort")} ${pvPct}` : null,
+        constructSelection.usability && uPct !== null && uPct !== "--" ? `${t("usabilityShort")} ${uPct}` : null,
+    ].filter((value): value is string => value !== null);
+    const dualPctText = scoreParts.length === 0 ? null : scoreParts.join(" · ");
 
     return (
         <Pressable

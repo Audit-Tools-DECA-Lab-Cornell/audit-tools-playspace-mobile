@@ -27,6 +27,11 @@ export interface ExportableAudit {
     readonly auditSession: import("lib/audit/types").AuditSession;
     readonly context: AuditExportContext | null;
     readonly auditorProfile: ExportAuditorProfile | null;
+    /**
+     * Play Value / Usability selection to apply. Omitted or default-valued
+     * exports the whole audit, byte-for-byte as before this option existed.
+     */
+    readonly resultFilter?: import("lib/audit/report-filter").ReportResultFilter;
 }
 
 /** Lightweight workbook-style preview shown in the reports screen. */

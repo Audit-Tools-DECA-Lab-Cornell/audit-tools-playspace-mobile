@@ -2,6 +2,7 @@ import { memo, useMemo } from "react";
 import { Paragraph, Text, XStack, YStack } from "tamagui";
 import { useTranslation } from "react-i18next";
 import type { DomainReportRow, RankedDomain, SociabilityCategoryRanking } from "lib/audit/report-helpers";
+import type { ConstructSelection } from "lib/audit/report-filter";
 import {
     buildConstructRankings,
     buildSociabilityCategoryRankings,
@@ -13,21 +14,19 @@ import { getScaleAccentColor, useDesignSystem } from "lib/design-system";
 import { useResponsiveLayout } from "lib/responsive-layout";
 
 export interface BestWorstTableProps {
-    readonly domainRows: DomainReportRow[];
+    readonly domainRows: readonly DomainReportRow[];
+    readonly constructSelection?: ConstructSelection;
 }
 
 type ConstructKey = "provision" | "variety" | "challenge" | "sociability" | "play_value" | "usability";
 
-// Phone: 2 per row (3 rows). Tablet: 3 per row (2 rows).
-const PHONE_CONSTRUCT_ROWS: readonly (readonly [ConstructKey, ConstructKey])[] = [
-    ["provision", "variety"],
-    ["challenge", "sociability"],
-    ["play_value", "usability"],
-];
-
-const TABLET_CONSTRUCT_ROWS: readonly (readonly [ConstructKey, ConstructKey, ConstructKey])[] = [
-    ["provision", "variety", "challenge"],
-    ["sociability", "play_value", "usability"],
+const CONSTRUCT_KEYS: readonly ConstructKey[] = [
+    "provision",
+    "variety",
+    "challenge",
+    "sociability",
+    "play_value",
+    "usability",
 ];
 
 const CONSTRUCT_LABEL_KEYS: Record<ConstructKey, string> = {
@@ -325,7 +324,10 @@ function SociabilityCategoryCell({
  * Phone: 2-column grid (3 rows).
  * Tablet: 3-column grid (2 rows).
  */
-export const BestWorstTable = memo(function BestWorstTable({ domainRows }: BestWorstTableProps) {
+export const BestWorstTable = memo(function BestWorstTable({
+    domainRows,
+    constructSelection = { playValue: true, usability: true },
+}: BestWorstTableProps) {
     const ds = useDesignSystem();
     const layout = useResponsiveLayout();
     const { t } = useTranslation("reports");
@@ -337,6 +339,17 @@ export const BestWorstTable = memo(function BestWorstTable({ domainRows }: BestW
         () => (capturesSociabilityBreakdown ? buildSociabilityCategoryRankings(domainRows) : []),
         [capturesSociabilityBreakdown, domainRows],
     );
+    const constructRows = useMemo(() => {
+        const visibleKeys = CONSTRUCT_KEYS.filter((key) => {
+            if (key === "play_value") return constructSelection.playValue;
+            if (key === "usability") return constructSelection.usability;
+            return true;
+        });
+        const columnsPerRow = layout.isTablet ? 3 : 2;
+        return Array.from({ length: Math.ceil(visibleKeys.length / columnsPerRow) }, (_unused, index) =>
+            visibleKeys.slice(index * columnsPerRow, (index + 1) * columnsPerRow),
+        );
+    }, [constructSelection.playValue, constructSelection.usability, layout.isTablet]);
 
     return (
         <YStack gap="$3" width="100%">
@@ -359,29 +372,9 @@ export const BestWorstTable = memo(function BestWorstTable({ domainRows }: BestW
                 >
                     {t("bestWorst.insufficientData")}
                 </Paragraph>
-            ) : layout.isTablet ? (
-                <YStack gap="$2">
-                    {TABLET_CONSTRUCT_ROWS.map((row, rowIndex) => (
-                        <XStack key={`row-${rowIndex}`} gap="$2">
-                            {row.map((constructKey) => {
-                                const ranking = rankingByKey.get(constructKey);
-                                return (
-                                    <ConstructCell
-                                        key={constructKey}
-                                        constructKey={constructKey}
-                                        label={t(CONSTRUCT_LABEL_KEYS[constructKey])}
-                                        ds={ds}
-                                        best={ranking?.bestDomain ?? null}
-                                        worst={ranking?.worstDomain ?? null}
-                                    />
-                                );
-                            })}
-                        </XStack>
-                    ))}
-                </YStack>
             ) : (
                 <YStack gap="$2">
-                    {PHONE_CONSTRUCT_ROWS.map((row, rowIndex) => (
+                    {constructRows.map((row, rowIndex) => (
                         <XStack key={`row-${rowIndex}`} gap="$2">
                             {row.map((constructKey) => {
                                 const ranking = rankingByKey.get(constructKey);

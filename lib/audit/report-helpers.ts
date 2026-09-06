@@ -1,4 +1,29 @@
-import { calculateQuestionScores, formatScoreValue } from "lib/audit/score-helpers";
+import {
+    addScoreTotals,
+    calculateQuestionScores,
+    createEmptyScoreTotals,
+    formatScoreValue,
+    getEffectiveAuditScoreTotals,
+    getScoreVariantBuckets,
+    type ScoreVariantKey,
+    type UnsurePolicy,
+} from "lib/audit/score-helpers";
+import {
+    buildQuestionLookup,
+    createDefaultReportFilter,
+    getVisibleReportConstructs,
+    getQuestionConstructKeys,
+    isDefaultReportFilter,
+    maskScoreTotalsByConstructSelection,
+    pruneUnknownDomainOverrides,
+    questionMatchesConstructSelection,
+    resolveDomainConstructSelection,
+    resolveQuestionConstructSelection,
+    type ConstructSelection,
+    type DomainConstructCoverage,
+    type ReportResultFilter,
+} from "lib/audit/report-filter";
+import { isQuestionVisible } from "lib/audit/selectors";
 import {
     SOCIABILITY_CATEGORY_KEYS,
     readSociabilitySelectionState,
@@ -22,7 +47,20 @@ export interface DomainReportRow {
     readonly scoreTotals: AuditScoreTotals | null;
     readonly itemCount: number;
     readonly sectionNotes: string[];
+    readonly commentOnlyNotes: string[];
+    readonly filteredOutQuestionCount: number;
     readonly questions: DomainQuestionRow[];
+}
+
+export interface ReportScoreProjection {
+    readonly filter: ReportResultFilter;
+    readonly isFiltered: boolean;
+    readonly domainRows: readonly DomainReportRow[];
+    readonly scoreBuckets: AuditScoreVariantBuckets;
+    readonly overall: AuditScoreTotals | null;
+    readonly unsureAnswerCount: number;
+    readonly visibleConstructs: ConstructSelection;
+    readonly domainCoverage: Readonly<Record<string, DomainConstructCoverage>>;
 }
 
 /**
@@ -135,6 +173,12 @@ const CONSTRUCT_ACCESSORS: readonly ConstructAccessor[] = [
     { key: "usability", value: (t) => t.usability_total, max: (t) => t.usability_total_max },
 ];
 
+const UNSURE_POLICY_BY_VARIANT: Record<ScoreVariantKey, UnsurePolicy> = {
+    canonical: "unsure_as_excluded",
+    unsure_as_zero: "unsure_as_zero",
+    unsure_as_max: "unsure_as_max",
+};
+
 /**
  * Convert a snake_case domain key to a human title.
  *
@@ -148,7 +192,13 @@ export function toDomainTitle(domainKey: string): string {
         .join(" ");
 }
 
-function normalizeDomainKey(domainKey: string): string {
+/**
+ * Normalize a raw domain label into the key domain rows and filter overrides use.
+ *
+ * @param domainKey Raw domain label from the instrument or `scores.by_domain`.
+ * @returns Lowercased key with whitespace collapsed to underscores.
+ */
+export function normalizeDomainKey(domainKey: string): string {
     return domainKey.trim().toLowerCase().replace(/\s+/g, "_");
 }
 
@@ -297,8 +347,50 @@ export function countUniqueScaledQuestionsWithDomains(instrument: PlayspaceInstr
     return questionKeys.size;
 }
 
-function buildDomainQuestionRow(question: InstrumentQuestion, answers: QuestionResponsePayload): DomainQuestionRow {
-    const scores = calculateQuestionScores(question, answers);
+export function countIncludedUniqueScaledQuestionsWithDomains(
+    auditSession: AuditSession,
+    instrument: PlayspaceInstrument,
+    filter: ReportResultFilter,
+): number {
+    const questionLookup = buildQuestionLookup(instrument);
+    const executionMode =
+        auditSession.selected_execution_mode ?? auditSession.meta.execution_mode ?? auditSession.scores.execution_mode;
+    const includedQuestionKeys = new Set<string>();
+
+    instrument.sections.forEach((section) => {
+        const sectionResponses = auditSession.aggregate.sections[section.section_key]?.responses ?? {};
+        section.questions
+            .filter((question) => isQuestionVisible(question, executionMode, sectionResponses))
+            .forEach((question) => {
+                if (
+                    question.question_type !== "scaled" ||
+                    getQuestionDomainKeys(question, questionLookup).length === 0
+                ) {
+                    return;
+                }
+                const selection = resolveQuestionConstructSelection(
+                    question,
+                    questionLookup,
+                    getQuestionDomainKeys,
+                    filter,
+                );
+                if (questionMatchesConstructSelection(getQuestionConstructKeys(question, questionLookup), selection)) {
+                    includedQuestionKeys.add(question.question_key);
+                }
+            });
+    });
+
+    return includedQuestionKeys.size;
+}
+
+function buildDomainQuestionRow(
+    question: InstrumentQuestion,
+    answers: QuestionResponsePayload,
+    selection: ConstructSelection | null,
+    unsurePolicy: UnsurePolicy,
+): DomainQuestionRow {
+    const rawScores = calculateQuestionScores(question, answers, unsurePolicy);
+    const scores = selection === null ? rawScores : maskScoreTotalsByConstructSelection(rawScores, selection);
     const provisionAnswerKey = readStringAnswer(answers, "provision");
     const provisionInfo = resolveScaleOptionInfo(question, "provision", provisionAnswerKey);
     const provisionScale = question.scales.find((scale: InstrumentScaleDefinition) => scale.key === "provision");
@@ -436,16 +528,29 @@ function compareQuestionRowsByIdentifier(a: DomainQuestionRow, b: DomainQuestion
  * @returns One row per domain in first-seen instrument order, plus orphan `by_domain` keys.
  * Questions may belong to multiple domains; each domain row lists every question that includes that domain.
  */
+export interface BuildDomainReportRowsOptions {
+    /** Report filter. Omitted or default-valued leaves the report unfiltered. */
+    readonly filter?: ReportResultFilter;
+    /** Unsure policy matching the selected score variant, used when recomputing filtered totals. */
+    readonly unsurePolicy?: UnsurePolicy;
+}
+
 export function buildDomainReportRows(
     auditSession: AuditSession,
     instrument: PlayspaceInstrument,
     scoreBuckets: AuditSession["scores"] | AuditScoreVariantBuckets = auditSession.scores,
+    options: BuildDomainReportRowsOptions = {},
 ): DomainReportRow[] {
+    const filter = options.filter;
+    const isFiltering = filter !== undefined && !isDefaultReportFilter(filter);
+    const unsurePolicy = options.unsurePolicy ?? "unsure_as_excluded";
     const questionLookup = Object.fromEntries(
         instrument.sections.flatMap((section: InstrumentSectionDefinition) =>
             section.questions.map((question: InstrumentQuestion) => [question.question_key, question] as const),
         ),
     ) as Readonly<Record<string, InstrumentQuestion>>;
+    const executionMode =
+        auditSession.selected_execution_mode ?? auditSession.meta.execution_mode ?? scoreBuckets.execution_mode;
     const byDomain = scoreBuckets.by_domain;
     const normalizedScoreByDomain = new Map<string, AuditScoreTotals | null>();
     Object.entries(byDomain).forEach(([rawDomainKey, totals]) => {
@@ -473,19 +578,22 @@ export function buildDomainReportRows(
         const sectionFirstSeenIndex = new Map<string, number>();
         let sectionOrderCounter = 0;
 
-        section.questions.forEach((question: InstrumentQuestion) => {
-            getQuestionDomainKeys(question, questionLookup).forEach((domainKey) => {
-                sectionDomainCounts.set(domainKey, (sectionDomainCounts.get(domainKey) ?? 0) + 1);
-                if (!sectionFirstSeenIndex.has(domainKey)) {
-                    sectionFirstSeenIndex.set(domainKey, sectionOrderCounter);
-                    sectionOrderCounter += 1;
-                }
-                if (!firstSeenSet.has(domainKey)) {
-                    firstSeenSet.add(domainKey);
-                    firstSeenDomainOrder.push(domainKey);
-                }
+        const sectionResponses = auditSession.aggregate.sections[section.section_key]?.responses ?? {};
+        section.questions
+            .filter((question: InstrumentQuestion) => isQuestionVisible(question, executionMode, sectionResponses))
+            .forEach((question: InstrumentQuestion) => {
+                getQuestionDomainKeys(question, questionLookup).forEach((domainKey) => {
+                    sectionDomainCounts.set(domainKey, (sectionDomainCounts.get(domainKey) ?? 0) + 1);
+                    if (!sectionFirstSeenIndex.has(domainKey)) {
+                        sectionFirstSeenIndex.set(domainKey, sectionOrderCounter);
+                        sectionOrderCounter += 1;
+                    }
+                    if (!firstSeenSet.has(domainKey)) {
+                        firstSeenSet.add(domainKey);
+                        firstSeenDomainOrder.push(domainKey);
+                    }
+                });
             });
-        });
 
         let dominantDomain: string | null = null;
         let dominantCount = -1;
@@ -544,30 +652,59 @@ export function buildDomainReportRows(
     });
 
     return domainOrder.map((domainKey) => {
-        const scoreTotals = normalizedScoreByDomain.get(domainKey) ?? null;
+        const domainSelection = filter === undefined ? null : resolveDomainConstructSelection(filter, domainKey);
+        const domainIsFiltered =
+            isFiltering && domainSelection !== null && !(domainSelection.playValue && domainSelection.usability);
+        let recomputedTotals = domainIsFiltered ? createEmptyScoreTotals() : null;
+        let scoreTotals = normalizedScoreByDomain.get(domainKey) ?? null;
         let itemCount = 0;
+        let scoredItemCount = 0;
+        let filteredOutQuestionCount = 0;
         const questions: DomainQuestionRow[] = [];
         const sectionNotes: string[] = [];
+        const commentOnlyNotes: string[] = [];
 
         instrument.sections.forEach((section: InstrumentSectionDefinition, sectionIndex: number) => {
             let sectionTouchesDomain = false;
-            section.questions.forEach((question: InstrumentQuestion) => {
-                const domainKeysForQuestion = getQuestionDomainKeys(question, questionLookup);
-                if (!domainKeysForQuestion.includes(domainKey)) {
-                    return;
-                }
-                sectionTouchesDomain = true;
-                itemCount += 1;
-                const responses =
-                    auditSession.aggregate.sections[section.section_key]?.responses[question.question_key] ?? {};
-                if (question.question_type === "scaled" || question.question_type === "checklist") {
-                    questions.push(buildDomainQuestionRow(question, responses));
-                }
-                const questionNote = collectQuestionNote(question, responses, sectionIndex + 1);
-                if (questionNote !== null) {
-                    sectionNotes.push(questionNote);
-                }
-            });
+            const sectionResponses = auditSession.aggregate.sections[section.section_key]?.responses ?? {};
+            section.questions
+                .filter((question: InstrumentQuestion) => isQuestionVisible(question, executionMode, sectionResponses))
+                .forEach((question: InstrumentQuestion) => {
+                    const domainKeysForQuestion = getQuestionDomainKeys(question, questionLookup);
+                    if (!domainKeysForQuestion.includes(domainKey)) {
+                        return;
+                    }
+                    sectionTouchesDomain = true;
+                    const responses = sectionResponses[question.question_key] ?? {};
+                    const questionNote = collectQuestionNote(question, responses, sectionIndex + 1);
+                    if (
+                        domainSelection !== null &&
+                        !questionMatchesConstructSelection(
+                            getQuestionConstructKeys(question, questionLookup),
+                            domainSelection,
+                        )
+                    ) {
+                        filteredOutQuestionCount += 1;
+                        if (questionNote !== null) {
+                            commentOnlyNotes.push(questionNote);
+                        }
+                        return;
+                    }
+                    itemCount += 1;
+                    if (recomputedTotals !== null && question.question_type === "scaled") {
+                        scoredItemCount += 1;
+                        recomputedTotals = addScoreTotals(
+                            recomputedTotals,
+                            calculateQuestionScores(question, responses, unsurePolicy),
+                        );
+                    }
+                    if (question.question_type === "scaled" || question.question_type === "checklist") {
+                        questions.push(buildDomainQuestionRow(question, responses, domainSelection, unsurePolicy));
+                    }
+                    if (questionNote !== null) {
+                        sectionNotes.push(questionNote);
+                    }
+                });
             if (sectionTouchesDomain) {
                 const note = collectSectionNote(auditSession, section.section_key, sectionIndex + 1, section.title);
                 if (note !== null) {
@@ -578,15 +715,216 @@ export function buildDomainReportRows(
 
         questions.sort(compareQuestionRowsByIdentifier);
 
+        if (recomputedTotals !== null) {
+            scoreTotals =
+                scoredItemCount === 0 || domainSelection === null
+                    ? null
+                    : maskScoreTotalsByConstructSelection(recomputedTotals, domainSelection);
+        }
+
         return {
             domainKey,
             domainTitle: toDomainTitle(domainKey),
             scoreTotals,
             itemCount,
             sectionNotes,
+            commentOnlyNotes,
+            filteredOutQuestionCount,
             questions,
         };
     });
+}
+
+/**
+ * Sum domain totals into one overall total.
+ *
+ * Overall figures are built by summing domain buckets, so a filtered report's
+ * overall total is the sum of the domain totals it still contains.
+ *
+ * @param domainRows Domain rows, already filtered.
+ * @returns Combined totals, or null when no domain carries a score.
+ */
+export function sumDomainScoreTotals(domainRows: readonly DomainReportRow[]): AuditScoreTotals | null {
+    const scored = domainRows.filter((row) => row.scoreTotals !== null);
+    if (scored.length === 0) {
+        return null;
+    }
+    return scored.reduce<AuditScoreTotals>(
+        (accumulated, row) => addScoreTotals(accumulated, row.scoreTotals as AuditScoreTotals),
+        createEmptyScoreTotals(),
+    );
+}
+
+export function getReportDomainConstructCoverage(
+    auditSession: AuditSession,
+    instrument: PlayspaceInstrument,
+): Readonly<Record<string, DomainConstructCoverage>> {
+    const questionLookup = buildQuestionLookup(instrument);
+    const executionMode =
+        auditSession.selected_execution_mode ?? auditSession.meta.execution_mode ?? auditSession.scores.execution_mode;
+    const coverage: Record<string, DomainConstructCoverage> = {};
+
+    instrument.sections.forEach((section) => {
+        const sectionResponses = auditSession.aggregate.sections[section.section_key]?.responses ?? {};
+        section.questions
+            .filter((question) => isQuestionVisible(question, executionMode, sectionResponses))
+            .forEach((question) => {
+                const constructKeys = getQuestionConstructKeys(question, questionLookup);
+                getQuestionDomainKeys(question, questionLookup).forEach((domainKey) => {
+                    const current = coverage[domainKey] ?? { playValue: false, usability: false };
+                    coverage[domainKey] = {
+                        playValue: current.playValue || constructKeys.includes("play_value"),
+                        usability: current.usability || constructKeys.includes("usability"),
+                    };
+                });
+            });
+    });
+
+    return coverage;
+}
+
+interface FilteredScoreBuckets {
+    readonly buckets: AuditScoreVariantBuckets;
+    readonly unsureAnswerCount: number;
+}
+
+function countQuestionUnsureAnswers(question: InstrumentQuestion, answers: QuestionResponsePayload): number {
+    const provisionScale = question.scales.find((scale) => scale.key === "provision");
+    const provisionAnswer = typeof answers.provision === "string" ? answers.provision : null;
+    const provisionOption = provisionScale?.options.find((option) => option.key === provisionAnswer);
+    if (provisionOption === undefined) {
+        return 0;
+    }
+    let count = provisionOption.is_unsure ? 1 : 0;
+    if (!provisionOption.allows_follow_up_scales) {
+        return count;
+    }
+    question.scales.forEach((scale) => {
+        if (scale.key === "provision") {
+            return;
+        }
+        const answer = answers[scale.key];
+        if (typeof answer === "string" && scale.options.some((option) => option.key === answer && option.is_unsure)) {
+            count += 1;
+        }
+    });
+    return count;
+}
+
+function buildFilteredScoreBuckets(
+    auditSession: AuditSession,
+    instrument: PlayspaceInstrument,
+    filter: ReportResultFilter,
+    variant: ScoreVariantKey,
+    domainRows: readonly DomainReportRow[],
+): FilteredScoreBuckets {
+    const selectedScores = getScoreVariantBuckets(auditSession.scores, variant);
+    const executionMode =
+        auditSession.selected_execution_mode ?? auditSession.meta.execution_mode ?? selectedScores.execution_mode;
+    const unsurePolicy = UNSURE_POLICY_BY_VARIANT[variant];
+    const questionLookup = buildQuestionLookup(instrument);
+    const bySection: Record<string, AuditScoreTotals> = {};
+    let auditTotals = createEmptyScoreTotals();
+    let surveyTotals = createEmptyScoreTotals();
+    let hasAuditQuestions = false;
+    let hasSurveyQuestions = false;
+    let unsureAnswerCount = 0;
+
+    instrument.sections.forEach((section) => {
+        const sectionResponses = auditSession.aggregate.sections[section.section_key]?.responses ?? {};
+        let sectionTotals = createEmptyScoreTotals();
+        let hasIncludedQuestions = false;
+
+        section.questions
+            .filter((question) => isQuestionVisible(question, executionMode, sectionResponses))
+            .forEach((question) => {
+                const selection = resolveQuestionConstructSelection(
+                    question,
+                    questionLookup,
+                    getQuestionDomainKeys,
+                    filter,
+                );
+                if (!questionMatchesConstructSelection(getQuestionConstructKeys(question, questionLookup), selection)) {
+                    return;
+                }
+
+                hasIncludedQuestions = true;
+                const answers = sectionResponses[question.question_key] ?? {};
+                unsureAnswerCount += countQuestionUnsureAnswers(question, answers);
+                const questionTotals = maskScoreTotalsByConstructSelection(
+                    calculateQuestionScores(question, answers, unsurePolicy),
+                    selection,
+                );
+                sectionTotals = addScoreTotals(sectionTotals, questionTotals);
+                if (selectedScores.audit !== null && (question.mode === "audit" || question.mode === "both")) {
+                    auditTotals = addScoreTotals(auditTotals, questionTotals);
+                    hasAuditQuestions = true;
+                }
+                if (selectedScores.survey !== null && (question.mode === "survey" || question.mode === "both")) {
+                    surveyTotals = addScoreTotals(surveyTotals, questionTotals);
+                    hasSurveyQuestions = true;
+                }
+            });
+
+        if (hasIncludedQuestions) {
+            bySection[section.section_key] = sectionTotals;
+        }
+    });
+
+    const byDomain = Object.fromEntries(
+        domainRows.flatMap((row) => (row.scoreTotals === null ? [] : [[row.domainKey, row.scoreTotals] as const])),
+    );
+
+    return {
+        buckets: {
+            execution_mode: selectedScores.execution_mode,
+            audit: hasAuditQuestions ? auditTotals : null,
+            survey: hasSurveyQuestions ? surveyTotals : null,
+            overall: sumDomainScoreTotals(domainRows),
+            by_section: bySection,
+            by_domain: byDomain,
+        },
+        unsureAnswerCount,
+    };
+}
+
+export function buildReportScoreProjection(
+    auditSession: AuditSession,
+    instrument: PlayspaceInstrument,
+    filterInput?: ReportResultFilter,
+    variant: ScoreVariantKey = "canonical",
+): ReportScoreProjection {
+    const selectedScores = getScoreVariantBuckets(auditSession.scores, variant);
+    const unfilteredRows = buildDomainReportRows(auditSession, instrument, selectedScores);
+    const filter = pruneUnknownDomainOverrides(
+        filterInput ?? createDefaultReportFilter(),
+        unfilteredRows.map((row) => row.domainKey),
+    );
+    const isFiltered = !isDefaultReportFilter(filter);
+    const domainRows = isFiltered
+        ? buildDomainReportRows(auditSession, instrument, selectedScores, {
+              filter,
+              unsurePolicy: UNSURE_POLICY_BY_VARIANT[variant],
+          })
+        : unfilteredRows;
+    const domainCoverage = getReportDomainConstructCoverage(auditSession, instrument);
+    const filteredScoreBuckets = isFiltered
+        ? buildFilteredScoreBuckets(auditSession, instrument, filter, variant, domainRows)
+        : null;
+    const scoreBuckets = filteredScoreBuckets?.buckets ?? selectedScores;
+
+    return {
+        filter,
+        isFiltered,
+        domainRows,
+        scoreBuckets,
+        overall: isFiltered ? scoreBuckets.overall : getEffectiveAuditScoreTotals(auditSession.scores, variant),
+        unsureAnswerCount: filteredScoreBuckets?.unsureAnswerCount ?? auditSession.scores.unsure_answer_count,
+        visibleConstructs: isFiltered
+            ? getVisibleReportConstructs(filter, domainCoverage)
+            : { playValue: true, usability: true },
+        domainCoverage,
+    };
 }
 
 /**
@@ -595,7 +933,7 @@ export function buildDomainReportRows(
  * @param domainRows Domain rows with titles and score totals.
  * @returns Six construct rankings in a stable order.
  */
-export function buildConstructRankings(domainRows: DomainReportRow[]): ConstructRanking[] {
+export function buildConstructRankings(domainRows: readonly DomainReportRow[]): ConstructRanking[] {
     return CONSTRUCT_ACCESSORS.map((accessor) => {
         const candidates: { title: string; score: number; max: number; ratio: number }[] = [];
         domainRows.forEach((row) => {

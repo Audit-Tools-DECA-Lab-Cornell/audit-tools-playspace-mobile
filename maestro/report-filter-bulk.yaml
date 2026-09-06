@@ -1,0 +1,80 @@
+appId: com.pratyush.sudhakar.audittoolsplayspacemobile
+---
+- runFlow: login.yaml
+- tapOn: "Reports"
+- scrollUntilVisible:
+      element:
+          id: "report-filter-bulk-trigger"
+      direction: DOWN
+      timeout: 30000
+- assertVisible: "Exporting: Play Value and Usability"
+- assertNotVisible:
+      id: "report-filter-bulk-banner"
+- tapOn:
+      id: "report-filter-bulk-trigger"
+- extendedWaitUntil:
+      visible: "Results to export"
+      timeout: 10000
+- assertVisible:
+      id: "report-filter-bulk-play-value"
+- assertVisible:
+      id: "report-filter-bulk-usability"
+- tapOn:
+      id: "report-filter-bulk-usability"
+- assertVisible:
+      id: "report-filter-bulk-reset"
+- back
+- assertVisible: "Exporting: Play Value"
+- assertVisible:
+      id: "report-filter-bulk-banner"
+- assertVisible: "Showing Play Value results only."
+- stopApp
+- launchApp
+- tapOn: "Reports"
+- scrollUntilVisible:
+      element:
+          id: "report-filter-bulk-banner"
+      direction: DOWN
+      timeout: 30000
+- assertVisible:
+      id: "report-filter-bulk-show-full"
+- assertVisible: "Showing Play Value results only."
+- assertVisible: "Exporting: Play Value"
+- tapOn:
+      id: "report-filter-bulk-show-full"
+- assertNotVisible:
+      id: "report-filter-bulk-banner"
+- assertVisible: "Exporting: Play Value and Usability"
+- stopApp
+- launchApp
+- tapOn: "Reports"
+- scrollUntilVisible:
+      element:
+          id: "report-filter-bulk-banner"
+      direction: DOWN
+      timeout: 30000
+- assertVisible: "Showing Play Value results only."
+- assertVisible: "Exporting: Play Value"
+- tapOn:
+      id: "report-filter-bulk-trigger"
+- tapOn:
+      id: "report-filter-bulk-reset"
+- back
+- assertVisible: "Exporting: Play Value and Usability"
+- assertNotVisible:
+      id: "report-filter-bulk-banner"
+- tapOn:
+      id: "report-filter-bulk-trigger"
+- tapOn:
+      id: "report-filter-bulk-play-value"
+- back
+- assertVisible: "Exporting: Usability"
+- assertVisible: "Showing Usability results only."
+- tapOn:
+      id: "report-filter-bulk-trigger"
+- tapOn:
+      id: "report-filter-bulk-reset"
+- back
+- assertVisible: "Exporting: Play Value and Usability"
+- assertNotVisible:
+      id: "report-filter-bulk-banner"

@@ -62,31 +62,44 @@ export function getVisibleQuestions(
     executionMode: ExecutionMode,
     sectionResponses: Record<string, QuestionResponsePayload> = {},
 ): InstrumentQuestion[] {
-    return questions.filter((question) => {
-        if (executionMode !== "both" && question.mode !== "both" && question.mode !== executionMode) {
-            return false;
-        }
+    return questions.filter((question) => isQuestionVisible(question, executionMode, sectionResponses));
+}
 
-        if (question.display_if === null || question.display_if === undefined) {
-            return true;
-        }
-
-        const parentAnswers = sectionResponses[question.display_if.question_key];
-        if (parentAnswers === undefined) {
-            return false;
-        }
-
-        const selectedValue = parentAnswers[question.display_if.response_key];
-        if (typeof selectedValue === "string") {
-            return question.display_if.any_of_option_keys.includes(selectedValue);
-        }
-
-        if (Array.isArray(selectedValue)) {
-            return selectedValue.some((entry) => question.display_if?.any_of_option_keys.includes(entry));
-        }
-
+export function isQuestionVisible(
+    question: InstrumentQuestion,
+    executionMode: ExecutionMode | null,
+    sectionResponses: Record<string, QuestionResponsePayload>,
+): boolean {
+    if (
+        executionMode !== null &&
+        executionMode !== "both" &&
+        question.mode !== "both" &&
+        question.mode !== executionMode
+    ) {
         return false;
-    });
+    }
+
+    if (question.display_if === null || question.display_if === undefined) {
+        return true;
+    }
+
+    const parentAnswers = sectionResponses[question.display_if.question_key];
+    if (parentAnswers === undefined) {
+        return false;
+    }
+
+    const selectedValue = parentAnswers[question.display_if.response_key];
+    if (typeof selectedValue === "string") {
+        return question.display_if.any_of_option_keys.includes(selectedValue);
+    }
+
+    if (Array.isArray(selectedValue)) {
+        return selectedValue.some(
+            (entry) => typeof entry === "string" && question.display_if?.any_of_option_keys.includes(entry),
+        );
+    }
+
+    return false;
 }
 
 /**
